@@ -5,7 +5,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageChops
 
 ASSETS = sys.argv[1]          # dir with fonts/ masks
 OUT = sys.argv[2]             # output mp4
-PREVIEW = len(sys.argv) > 3   # if set: dump a few stills only
+IDENT = int(sys.argv[3]) if len(sys.argv) > 3 else 1   # 1, 2 ou 3 : quelle charte
+PREVIEW = len(sys.argv) > 4   # if set: dump a few stills only
 
 W, H, FPS, BPM = 1080, 1920, 30, 120
 BEAT = 60 / BPM               # 0.5 s
@@ -16,8 +17,9 @@ NF = int(DUR * FPS)
 # ---------- palettes (charte graphique) ----------
 P1 = dict(bg="#0B0F1E", a="#E8B04A", c="#FFFEF1", b="#7BB1DD")
 P2 = dict(bg="#0D0D11", a="#D9203D", c="#FFFEF1", b="#F4A195")
-P3 = dict(bg="#1E0D14", a="#E4A479", c="#FFFEEB", b="#E9F188")
+P3 = dict(bg="#280D19", a="#E4A479", c="#FFFEEB", b="#E9F188")
 PALS = [P1, P2, P3]
+PAL = PALS[IDENT - 1]
 
 F = lambda n: os.path.join(ASSETS, "fonts", n)
 KOKO, BOLD, LIGHT = F("Kokoschka-casa.ttf"), F("Stolzl-Bold-casa.ttf"), F("Stolzl-Light-casa.ttf")
@@ -108,7 +110,7 @@ def pulse(t, decay=7.0):
     return math.exp(-ph * BEAT * decay)
 
 def scene_intro(cv, t):        # beats 0-3 : la maison se dessine
-    p = P1
+    p = PAL
     cv.paste(Image.new("RGBA", (W, H), p["bg"]))
     # rising tide of waves at the bottom
     k = eout(t / 2.0)
@@ -132,7 +134,7 @@ def scene_intro(cv, t):        # beats 0-3 : la maison se dessine
 
 WORDS = [("UNE", "a", "bg"), ("MAISON", "a", "bg"), ("LA", "b", "bg"), ("MER", "b", "bg"), ("LA", "bg", "c"), ("NUIT", "bg", "a")]
 def scene_words(cv, t):        # beats 4-9 : UNE MAISON / LA MER / LA NUIT
-    p = P1
+    p = PAL
     i = int(beat_of(t)); lt = t - i * BEAT
     bgk, fgk = WORDS[i][1], WORDS[i][2]
     cv.paste(Image.new("RGBA", (W, H), p[bgk]))
@@ -154,9 +156,13 @@ def scene_words(cv, t):        # beats 4-9 : UNE MAISON / LA MER / LA NUIT
     im = text_img(sub, LIGHT, 64, p[fgk], tracking=6)
     paste_c(cv, im, W / 2, 1180, alpha=eout(lt / 0.2))
 
-def scene_flicker(cv, t):      # beats 10-15 : le logo dans les 3 palettes
+def scene_flicker(cv, t):      # beats 10-15 : le logo en variantes de la charte
     i = int(beat_of(t)); lt = t - i * BEAT
-    p = PALS[i % 3]
+    P = PAL
+    # (fond, logo, texte) : on alterne les couleurs de la même charte
+    v = [("bg", "a", "c"), ("a", "bg", "bg"), ("b", "bg", "bg")][i % 3]
+    p = dict(bg=P[v[0]], a=P[v[1]], c=P[v[2]], b=P[v[2]])
+    pill_txt = P[v[0]]
     cv.paste(Image.new("RGBA", (W, H), p["bg"]))
     # repeating icons in background, scrolling
     small = logo("icon", p["a"], 120)
@@ -174,7 +180,7 @@ def scene_flicker(cv, t):      # beats 10-15 : le logo dans les 3 palettes
     paste_c(cv, im, W / 2, 1300, alpha=eout((t) / 0.6))
     # lower tag pill
     tag = ["STAFF", "VIP", "EARLY"][i % 3]
-    ti = text_img(tag, KOKO, 60, p["bg"])
+    ti = text_img(tag, KOKO, 60, pill_txt)
     bw = ti.width + 80
     rrect(cv, (W / 2 - bw / 2, 1400, W / 2 + bw / 2, 1490), 45, p["b"])
     paste_c(cv, ti, W / 2, 1445)
@@ -194,9 +200,9 @@ def wristband(color, txtcol, length=1500, hgt=120):
     return im
 
 def scene_merch(cv, t):        # beats 16-21 : bracelets + billet
-    p = P1
+    p = PAL
     cv.paste(Image.new("RGBA", (W, H), p["bg"]))
-    bands = [(p["a"], p["bg"], "STAFF", 520), (p["c"], p["bg"], "VIP", 760), (p["b"], p["c"], "EARLY", 1000)]
+    bands = [(p["a"], p["bg"], "STAFF", 520), (p["c"], p["bg"], "VIP", 760), (p["b"], p["bg"], "EARLY", 1000)]
     tt = t
     for j, (c, tc, lab, y) in enumerate(bands):
         st = j * BEAT * 0.5
@@ -222,7 +228,7 @@ def scene_merch(cv, t):        # beats 16-21 : bracelets + billet
 
 _ticket = {}
 def ticket(p):
-    if "t" in _ticket: return _ticket["t"]
+    if p["a"] in _ticket: return _ticket[p["a"]]
     w, h = 840, 1180
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -240,11 +246,11 @@ def ticket(p):
     put(B("22€", 120), 70, 545)
     ic = logo("icon", p["bg"], 200); put(ic, w - 280, 520)
     put(B("CASA MAR", 120), (w - B("CASA MAR", 120).width) / 2, 935)
-    _ticket["t"] = im
+    _ticket[p["a"]] = im
     return im
 
 def scene_info(cv, t):         # beats 22-27 : 22€ / location
-    p = P1
+    p = PAL
     i = int(beat_of(t)); lt = t - i * BEAT
     if i < 3:
         cv.paste(Image.new("RGBA", (W, H), p["bg"]))
@@ -261,11 +267,11 @@ def scene_info(cv, t):         # beats 22-27 : 22€ / location
         for j, word in enumerate(["CRS DE", "PROVENCE"]):
             k = eout((tt - 0.12 - j * 0.15) / 0.35)
             big_text(cv, word, p["bg"], 840 + j * 250, maxw=900, maxh=230, scale=0.6 + 0.4 * k, alpha=k)
-        pin = logo("icon", p["c"], 180)
+        pin = logo("icon", p["bg"], 180)
         paste_c(cv, pin, W / 2, 1330 + 16 * math.sin(t * 6), alpha=eout((tt - 0.4) / 0.3))
 
 def scene_end(cv, t):          # beats 28-31 : lockup final
-    p = P1
+    p = PAL
     cv.paste(Image.new("RGBA", (W, H), p["bg"]))
     for i in range(4):
         waves(cv, p["b"], 1500 + i * 70, t + i * 0.4, amp=12, wl=200, thick=7, rows=1, alpha=70 + 40 * i)
@@ -370,13 +376,13 @@ def audio(path, sr=44100):
 if __name__ == "__main__":
     if PREVIEW:
         for b in [1.5, 3.2, 4.3, 5.3, 6.3, 7.3, 8.3, 9.3, 10.3, 12.3, 14.3, 16.6, 17.3, 19.2, 21.5, 23, 26, 30.5]:
-            frame(int(b * BEAT * FPS)).save(os.path.join(OUT, f"prev_{b:05.1f}.png"))
+            frame(int(b * BEAT * FPS)).save(os.path.join(OUT, f"prev{IDENT}_{b:05.1f}.png"))
         sys.exit()
     wav = OUT.replace(".mp4", ".wav")
     audio(wav)
     p = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
                           "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", wav,
-                          "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+                          "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-pix_fmt", "yuv420p",
                           "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", OUT],
                          stdin=subprocess.PIPE)
     for n in range(NF):
