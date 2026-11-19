@@ -3,15 +3,21 @@
 Arrivée en vue subjective : coucher de soleil sur la mer, la maison au loin qu'on entend
 étouffée, on s'approche, on entre, le son s'ouvre et le nom tombe sur le drop.
 
-Usage : python render_artist.py <assets_dir> <out.mp4|preview_dir> <charte 1|2|3> "<NOM ARTISTE>" [--real] [preview]
+Usage : python render_artist.py <assets_dir> <out.mp4|preview_dir> <charte 1|2|3> "<NOM ARTISTE>"
+              [--real] [--music=morceau.mp3 --drop-at=SECONDES] [preview]
+--music : remplace la musique générée par ton morceau (sous licence). --drop-at : la seconde du
+morceau qui doit tomber pile sur l'apparition du nom (18 s dans la vidéo).
 Sans --real, une mention « EXEMPLE » est incrustée (annonce fictive, à ne pas publier).
 """
 import sys, os, math, subprocess, wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageChops, ImageFilter
 
-args = [a for a in sys.argv[1:] if a not in ("--real", "preview")]
+args = [a for a in sys.argv[1:] if a not in ("--real", "preview") and not a.startswith("--")]
 REAL = "--real" in sys.argv
+OPT = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+MUSIC = OPT.get("music")                      # morceau fourni (droits à ta charge)
+DROP_AT = float(OPT.get("drop-at", "0"))      # seconde du morceau qui doit tomber sur le drop
 PREVIEW = "preview" in sys.argv
 ASSETS, OUT, IDENT, ARTIST = args[0], args[1], args[2], args[3].upper()
 sys.argv = [sys.argv[0], ASSETS, OUT, IDENT]
@@ -97,33 +103,24 @@ def draw_exterior(cv, t, zoom):
         w = (40 + 300 * k) * (1 - kn * 0.8) * (0.6 + 0.4 * math.sin(t * 3 + i * 2))
         if w > 4: d.rounded_rectangle((W / 2 - w / 2, y, W / 2 + w / 2, y + 3 + 6 * k), 4, fill=tuple(int(v) for v in C["a"]) + (int(150 * (1 - kn * 0.6)),))
 
-# ------------------------------------------------------------------ intérieur : faisceaux, brume, particules
-def beams(t, intensity, n=7, spread=1.0):
-    lw, lh = W // 4, H // 4
-    L = Image.new("RGBA", (lw, lh), (0, 0, 0, 0)); d = ImageDraw.Draw(L)
-    cols = [C["a"], C["b"], C["a"] * 0.6 + C["b"] * 0.4]
-    for i in range(n):
-        ox = lw * (i + 0.5) / n
-        ang = math.radians(90 + spread * 38 * math.sin(t * (0.9 + i * 0.13) + i * 1.7))
-        ln = lh * 1.4; wd = 0.06 + 0.03 * (i % 3)
-        x1, y1 = ox + math.cos(ang - wd) * ln, math.sin(ang - wd) * ln
-        x2, y2 = ox + math.cos(ang + wd) * ln, math.sin(ang + wd) * ln
-        c = cols[i % 3]
-        d.polygon([(ox, -2), (x1, y1), (x2, y2)], fill=tuple(int(v) for v in c) + (int(min(255, 52 * intensity)),))
-    L = L.filter(ImageFilter.GaussianBlur(5)).resize((W, H), Image.BILINEAR)
-    return L
+# ------------------------------------------------------------------ intérieur : tunnel de maisons au trait
+HOUSE = [(-0.5, 0.45), (-0.5, -0.12), (0, -0.55), (0.5, -0.12), (0.5, 0.45)]
+def house_line(d, cx, cy, size, color, alpha, width=2):
+    pts = [(cx + x * size, cy + y * size) for x, y in HOUSE]
+    d.line(pts, fill=tuple(int(v) for v in color) + (int(alpha),), width=width, joint="curve")
 
-SPARKS = [(rng.uniform(0, W), rng.uniform(0, H), rng.uniform(40, 160), rng.uniform(2, 5), rng.uniform(0, 9)) for _ in range(90)]
-def sparks(cv, t, a=1.0):
+def tunnel(cv, t, speed=0.18, n=9, color=None, strength=1.0, cy=960):
+    """Contours de la maison qui grandissent vers nous : on avance dans la maison."""
+    color = C["c"] if color is None else color
     d = ImageDraw.Draw(cv, "RGBA")
-    for x, y, sp, s, ph in SPARKS:
-        yy = (y - t * sp) % H; xx = x + 18 * math.sin(t + ph)
-        al = int(200 * a * (0.5 + 0.5 * math.sin(t * 4 + ph)))
-        d.ellipse((xx - s, yy - s, xx + s, yy + s), fill=tuple(int(v) for v in C["c"]) + (al,))
+    for i in range(n):
+        k = ((i / n) + t * speed) % 1.0
+        size = 90 * math.exp(k * 4.2)
+        a = 150 * strength * math.sin(math.pi * k) ** 1.2
+        if a > 2: house_line(d, W / 2, cy, size, color, a, width=2 if k < .7 else 3)
 
-def interior_bg(cv, t, intensity, spread=1.0):
-    cv.paste(Image.new("RGBA", (W, H), tuple(int(v) for v in NIGHT * 0.8) + (255,)))
-    cv.alpha_composite(beams(t, intensity, spread=spread))
+def interior_bg(cv, color=None):
+    cv.paste(Image.new("RGBA", (W, H), tuple(int(v) for v in (NIGHT * 0.8 if color is None else color)) + (255,)))
 
 # ------------------------------------------------------------------ texte
 def words(cv, txt, path, size, color, cy, a, tracking=6):
@@ -152,18 +149,19 @@ def tiles(cv, t_beats):
                 g = text_img(ch, KOKO, int(ts * 0.85), P["bg"])
                 tile.alpha_composite(g, ((ts - g.width) // 2, (tile.height - g.height) // 2))
             else:
-                td.rounded_rectangle((0, 0, ts - 1, tile.height - 1), 12, outline=P["c"] + "", width=3)
+                td.rounded_rectangle((0, 0, ts - 1, tile.height - 1), 12, fill=tuple(int(v) for v in NIGHT * 0.8) + (255,), outline=P["c"], width=3)
                 a = int(80 + 60 * math.sin(t_beats * 1.5 + ci))
                 td.rounded_rectangle((6, 6, ts - 7, tile.height - 7), 8, fill=tuple(int(v) for v in C["c"]) + (a // 4,))
             cv.alpha_composite(tile, (int(x), int(y)))
 
-def big_name(cv, t, cy=820, slam=True):
+def big_name(cv, t, cy=820, slam=True, cols=None):
     lines = name_lines(); y = cy
+    cols = cols or (P["c"], P["a"])
     for j, l in enumerate(lines):
-        im = text_img(l, KOKO, 400, P["c"] if j == 0 else P["a"])
+        im = text_img(l, KOKO, 400, cols[0] if j == 0 else cols[1])
         s = min((W - 120) / im.width, (360 if j else 300) / im.height)
         lt = t - j * 0.12
-        sc = s * (1 + (0.6 * (1 - eout(lt / 0.25)) if slam else 0))
+        sc = s * (1 + (0.25 * (1 - eout(lt / 0.35)) if slam else 0))
         if lt > 0:
             paste_c(cv, im, W / 2, y + im.height * s / 2, scale=sc, alpha=clamp(lt / 0.08))
         y += im.height * s + 26
@@ -180,32 +178,34 @@ def frame(n):
         words(cv, "et la maison s allume", LIGHT, 64, P["c"], 360, (t - 8.5) / 0.8 * (1 - clamp((t - 10.2) / 0.4)))
         if b > 20:                                          # on passe la porte : fondu dans le noir
             cv.alpha_composite(Image.new("RGBA", (W, H), tuple(int(v) for v in NIGHT * 0.8) + (int(255 * ease_io((b - 20) / 2)),)))
-    elif b < DROP:                                          # dedans : faisceaux, tuiles, montée
+    elif b < DROP:                                          # dedans : on avance dans la maison
         k = (b - 22) / (DROP - 22)
-        interior_bg(cv, t, 0.35 + 0.65 * k, spread=0.6 + k)
-        sparks(cv, t, 0.4 + 0.6 * k)
+        interior_bg(cv)
+        tunnel(cv, t, speed=0.12 + 0.25 * k ** 2, strength=0.5 + 0.5 * k)
         words(cv, "ce soir", LIGHT, 70, P["c"], 560, (b - 22.5) / 1.6 * (1 - clamp((b - 27.5) / 1)))
         words(cv, "tu le connais", LIGHT, 70, P["c"], 560, (b - 28.5) / 1.6)
         tiles(cv, b)
-        if b > DROP - 4:                                    # roulement : la caméra tremble un peu
-            sh = 6 * ((b - (DROP - 4)) / 4)
-            cv = ImageChops.offset(cv, int(rng.uniform(-sh, sh)), int(rng.uniform(-sh, sh)))
     elif b < 52:                                            # drop
         lt = t - DROP * BEAT
-        interior_bg(cv, t, 0.75 + 0.35 * beat_pulse(t, 8), spread=1.8)
-        sparks(cv, t, 1.0)
-        if b < 44:
-            words(cv, "CASA MAR ACCUEILLE", BOLD, 38, P["c"], 600, lt / 0.4, tracking=12)
-            big_name(cv, lt, 700)
-            words(cv, "REJOINT LE LINE UP", BOLD, 40, P["b"], 1360, (lt - 0.8) / 0.5, tracking=12)
+        if b < 44:                                          # aplat de couleur, le nom en grand
+            interior_bg(cv, C["a"])
+            wipe = eout(lt / 0.35)                          # le bloc couleur monte depuis le bas
+            if wipe < 1:
+                cover = Image.new("RGBA", (W, int(H * (1 - wipe)) + 1), tuple(int(v) for v in NIGHT * 0.8) + (255,))
+                cv.alpha_composite(cover, (0, 0))
+            words(cv, "CASA MAR ACCUEILLE", BOLD, 38, P["bg"], 560, (lt - 0.15) / 0.4, tracking=12)
+            big_name(cv, lt - 0.1, 680, cols=(P["bg"], P["bg"]))
+            words(cv, "REJOINT LE LINE UP", BOLD, 40, P["bg"], 1360, (lt - 0.8) / 0.5, tracking=12)
+            R.waves(cv, P["bg"], 1500, t * 0.6, amp=10, wl=130, thick=5, rows=2, gap=30, x0=W / 2 - 160, x1=W / 2 + 160)
         else:
             lt2 = t - 44 * BEAT
+            interior_bg(cv)
+            tunnel(cv, t, speed=0.08, strength=0.35, cy=700)
             big_name(cv, 9, 360, slam=False)
             d = ImageDraw.Draw(cv)
             d.line((140, 1010, W - 140, 1010), fill=P["c"], width=2)
             words(cv, "JUIN 2028", KOKO, 110, P["c"], 1110, lt2 / 0.4, tracking=0)
             words(cv, "CLOS DE PROVENCE   NIMES", BOLD, 36, P["c"], 1230, (lt2 - 0.3) / 0.4, tracking=10)
-            # jauge 1/5
             k = eout((lt2 - 0.6) / 0.6)
             if k > 0:
                 for i in range(5):
@@ -213,9 +213,6 @@ def frame(n):
                     d.rounded_rectangle((x0, 1320, x0 + 126, 1344), 12, outline=P["c"], width=3,
                                         fill=P["a"] if i == 0 else None)
                 words(cv, "1 SUR 5 ARTISTES DEVOILES", BOLD, 30, P["c"], 1395, k, tracking=10)
-        flash = beat_pulse(t, 14) * (1.0 if int(b) == DROP else 0.1)
-        if flash > 0.02:
-            cv.alpha_composite(Image.new("RGBA", (W, H), (255, 254, 241, int(255 * flash))))
     else:                                                   # sortie : retour sur la mer, infos
         lt = t - 52 * BEAT
         draw_exterior(cv, 11 + lt, 0.0)
@@ -305,6 +302,15 @@ def audio(path, sr=44100):
     add(music, r.normal(0, 1, len(x)) * (x / x[-1]) ** 2 * 0.25, (DROP - 6) * BEAT)
     for i in range(16):
         add(music, clap() * (0.4 + i / 20), (DROP - 4) * BEAT + i * BEAT / 4)
+    if MUSIC:                                       # morceau fourni : il remplace la musique générée
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", MUSIC, "-ac", "1", "-ar", str(sr), "-f", "f32le", "-"],
+                             capture_output=True, check=True).stdout
+        trk = np.frombuffer(raw, "<f4").astype(float)
+        start = int((DROP_AT - DROP * BEAT) * sr)      # le drop de la vidéo tombe sur DROP_AT
+        seg = np.zeros(len(music))
+        a0, b0 = max(0, start), min(len(trk), start + len(music))
+        if b0 > a0: seg[a0 - start:b0 - start] = trk[a0:b0]
+        music = seg / (np.abs(seg).max() + 1e-9) * 0.9
     # ambiance : vagues
     sea = np.convolve(r.normal(0, 1, N + sr), np.ones(300) / 300, "same")
     lfo = 0.55 + 0.45 * np.sin(2 * np.pi * np.arange(len(sea)) / sr * 0.16)
