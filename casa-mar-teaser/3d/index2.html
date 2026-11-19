@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Casa Mar 3D v2</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const Q = new URLSearchParams(location.search);
+const ID = Q.get('id') || '1';
+const PALS = {
+  1: { bg: '#0B0F1E', a: '#E8B04A', c: '#FFFEF1', b: '#7BB1DD' },
+  2: { bg: '#0D0D11', a: '#D9203D', c: '#FFFEF1', b: '#F4A195' },
+  3: { bg: '#280D19', a: '#E4A479', c: '#FFFEEB', b: '#E9F188' },
+};
+const P = PALS[ID];
+const W = 1080, H = 1920, BEAT = 0.5, DROP = 6.0, END = 15;
+const col = h => new THREE.Color(h);
+const night = col(P.bg).multiplyScalar(0.55);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const eio = x => { x = cl(x); return x * x * (3 - 2 * x); };
+const eout = x => 1 - Math.pow(1 - cl(x), 3);
+const lerp = (a, b, k) => a + (b - a) * k;
+const pulse = t => t < DROP ? 0 : Math.exp(-((t / BEAT) % 1) * BEAT * 6);
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+for (const [fam, file, wt] of [['Koko', 'Kokoschka-casa', 400], ['StolzlB', 'Stolzl-Bold-casa', 700], ['StolzlL', 'Stolzl-Light-casa', 300]]) {
+  const f = new FontFace(fam, `url(assets/${file}.woff2)`, { weight: String(wt) }); await f.load(); document.fonts.add(f);
+}
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.localClippingEnabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(night, 70, 260);
+const camera = new THREE.PerspectiveCamera(46, W / H, 0.1, 1000);
+scene.add(camera);
+
+// ---------- ciel
+const sky = new THREE.Mesh(new THREE.SphereGeometry(500, 48, 24), new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: { top: { value: night }, hor: { value: col(P.a).lerp(night, 0.3) }, mid: { value: col(ID === '3' ? P.a : P.b).lerp(night, 0.72) }, t: { value: 0 } },
+  vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+  fragmentShader: `uniform vec3 top, hor, mid; uniform float t; varying vec3 vP;
+    void main(){ float h = clamp(vP.y, 0., 1.); float dusk = smoothstep(0., 15., t);
+      vec3 c = mix(hor, mid, smoothstep(0., .1 + .05 * (1. - dusk), h)); c = mix(c, top, smoothstep(.08, .42, h));
+      float back = smoothstep(.2, -1., vP.z);                         // le ciel côté soleil reste plus chaud
+      c = mix(c, top, (1. - back) * .35 * dusk);
+      gl_FragColor = vec4(c, 1.); }`
+}));
+scene.add(sky);
+
+// ---------- étoiles qui scintillent, aux couleurs de la charte
+const starU = { t: { value: 0 } };
+{
+  const n = 1800, pos = new Float32Array(n * 3), cols = new Float32Array(n * 3), ph = new Float32Array(n), sz = new Float32Array(n);
+  const pal = [col(P.a), col(P.b), col(P.c)];
+  for (let i = 0; i < n; i++) {
+    const th = rnd() * Math.PI * 2, p = Math.acos(1 - rnd() * 0.86);
+    pos.set([Math.sin(p) * Math.cos(th) * 420, Math.cos(p) * 420 + 4, Math.sin(p) * Math.sin(th) * 420], i * 3);
+    cols.set(pal[i % 3].toArray(), i * 3); ph[i] = rnd() * 6.3; sz[i] = 1.2 + rnd() * rnd() * 4.5;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  g.setAttribute('ph', new THREE.BufferAttribute(ph, 1)); g.setAttribute('sz', new THREE.BufferAttribute(sz, 1));
+  scene.add(new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: starU, transparent: true, depthWrite: false, fog: false, vertexColors: true,
+    vertexShader: `uniform float t; attribute float ph; attribute float sz; varying vec3 vC; varying float vA;
+      void main(){ vC = color; vA = .55 + .45 * sin(t * (1.3 + fract(ph) * 2.) + ph);
+        gl_PointSize = sz * (.85 + .3 * vA); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`,
+    fragmentShader: `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - .5); if (d > .5) discard;
+      gl_FragColor = vec4(vC, vA * smoothstep(.5, .1, d)); }`
+  })));
+}
+
+// ---------- soleil rayé + halo
+function sunTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d');
+  x.fillStyle = P.a; x.beginPath(); x.arc(512, 512, 500, 0, 7); x.fill();
+  x.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < 7; i++) x.fillRect(0, 560 + i * 62, 1024, 16 + i * 3);
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; return tx;
+}
+const sun = new THREE.Mesh(new THREE.PlaneGeometry(74, 74), new THREE.MeshBasicMaterial({ map: sunTex(), transparent: true, fog: false, depthWrite: false, toneMapped: false }));
+sun.position.set(0, 6, -320); scene.add(sun);
+const halo = new THREE.Mesh(new THREE.PlaneGeometry(260, 260), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending,
+  uniforms: { c: { value: col(P.a) }, k: { value: 1 } },
+  vertexShader: `varying vec2 vU; void main(){ vU = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+  fragmentShader: `uniform vec3 c; uniform float k; varying vec2 vU; void main(){ float d = length(vU - .5) * 2.; gl_FragColor = vec4(c, pow(max(0., 1. - d), 2.6) * .32 * k); }`
+}));
+halo.position.set(0, 10, -321); scene.add(halo);
+
+// ---------- fond sous l'eau (pour que le reflet se lise à travers la mer)
+const deep = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshBasicMaterial({ color: col(P.bg).multiplyScalar(.35) }));
+deep.rotation.x = -Math.PI / 2; deep.position.y = -26; scene.add(deep);
+
+// ---------- mer
+const seaU = Object.assign({ t: { value: 0 }, base: { value: col(P.bg).multiplyScalar(0.75) }, line: { value: col(P.b) }, sun: { value: col(P.a) },
+  ripple: { value: 0 }, ripple2: { value: 0 }, glowc: { value: col(P.a) }, glow: { value: 0 } }, THREE.UniformsUtils.clone(THREE.UniformsLib.fog));
+const sea = new THREE.Mesh(new THREE.PlaneGeometry(700, 700, 360, 360), new THREE.ShaderMaterial({
+  uniforms: seaU, fog: true, transparent: true, depthWrite: true,
+  vertexShader: `uniform float t; varying vec3 vW; varying float vH;
+    #include <fog_pars_vertex>
+    float hgt(vec2 p){ return sin(p.y*.33 + t*1.5)*.42 + sin(p.x*.21 + p.y*.17 - t*1.05)*.32 + sin(p.x*.85 - t*2.2)*.07 + sin(p.y*1.7 + p.x*.4 + t*2.8)*.04; }
+    void main(){ vec4 w = modelMatrix * vec4(position,1.); float h = hgt(w.xz); w.y += h; vH = h; vW = w.xyz;
+      vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
+      #include <fog_vertex>
+    }`,
+  fragmentShader: `uniform vec3 base, line, sun, glowc; uniform float t, ripple, ripple2, glow; varying vec3 vW; varying float vH;
+    #include <fog_pars_fragment>
+    void main(){
+      float wave = sin(vW.z*.85 + sin(vW.x*.11 + t*.7)*1.7 + t*1.35);
+      float crest = smoothstep(.972, .997, wave) * (.6 + .4 * sin(vW.x * .05 + t));
+      float dist = length(vW.xz * vec2(1., 1.6));
+      float rip = ripple > 0. ? smoothstep(.7, 0., abs(dist - ripple)) * smoothstep(55., 4., ripple) : 0.;
+      rip += ripple2 > 0. ? smoothstep(.7, 0., abs(dist - ripple2)) * smoothstep(55., 4., ripple2) : 0.;
+      float path = smoothstep(10., 0., abs(vW.x + sin(vW.z*.08)*2.)) * smoothstep(-420., -30., vW.z) * (.5 + .5*sin(vW.z*1.2 + t*3.));
+      float near = smoothstep(14., 0., length(vW.xz)) * glow;           // la maison éclaire l'eau autour d'elle
+      vec3 c = base + line * crest * .34 + line * rip * .55 + sun * path * smoothstep(.2,.9,wave) * .28 + glowc * near * .18 + vec3(vH*.025);
+      gl_FragColor = vec4(c, .8);
+      #include <fog_fragment>
+    }`
+}));
+sea.rotation.x = -Math.PI / 2; sea.renderOrder = 2; scene.add(sea);
+
+// ---------- logo extrudé : maison + lettres séparées (les lettres sortent de l'eau une par une)
+const svg = new SVGLoader().parse(await (await fetch('assets/logo-h.svg')).text());
+const shapes = svg.paths.flatMap(p => SVGLoader.createShapes(p)).map(s => {
+  const pts = s.getPoints(); const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  return { s, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+});
+// séparation maison / texte : le plus grand écart vertical entre les formes
+const sorted = [...shapes].sort((a, b) => a.y0 - b.y0);
+let split = 0, best = -1;
+for (let i = 1; i < sorted.length; i++) {
+  const top = Math.max(...sorted.slice(0, i).map(s => s.y1)), gap = sorted[i].y0 - top;
+  if (gap > best) { best = gap; split = (top + sorted[i].y0) / 2; }
+}
+const houseShapes = shapes.filter(s => s.y1 < split), letterShapes = shapes.filter(s => s.y0 > split).sort((a, b) => a.x0 - b.x0);
+const X0 = Math.min(...shapes.map(s => s.x0)), X1 = Math.max(...shapes.map(s => s.x1)), BASE = Math.max(...shapes.map(s => s.y1));
+const S = 17 / (X1 - X0), CX = (X0 + X1) / 2, DEPTH = 120;
+const mat = new THREE.MeshStandardMaterial({ color: col(P.a), roughness: .38, metalness: .5, emissive: col(P.a), emissiveIntensity: .1, side: THREE.DoubleSide });
+function build(list) {
+  const geo = new THREE.ExtrudeGeometry(list.map(s => s.s), { depth: DEPTH, bevelEnabled: true, bevelThickness: 7, bevelSize: 3, bevelSegments: 3, curveSegments: 12 });
+  geo.translate(-CX, -BASE, -DEPTH / 2); geo.scale(S, -S, S); geo.computeVertexNormals();
+  return geo;
+}
+// regrouper les formes du texte par lettre (formes qui se chevauchent en x)
+const letters = [];
+for (const s of letterShapes) {
+  const last = letters[letters.length - 1];
+  if (last && s.x0 < last.x1 - 2) { last.items.push(s); last.x1 = Math.max(last.x1, s.x1); } else letters.push({ items: [s], x0: s.x0, x1: s.x1 });
+}
+const houseGeo = build(houseShapes);
+const HOUSE_BOTTOM = (BASE - Math.max(...houseShapes.map(s => s.y1))) * S;    // hauteur du pied de la maison au-dessus des lettres
+const HOUSE_TOP = (BASE - Math.min(...houseShapes.map(s => s.y0))) * S;
+const LET_TOP = (BASE - Math.min(...letterShapes.map(s => s.y0))) * S;
+const parts = [];                                    // { geo, kind, idx }
+parts.push({ geo: houseGeo, kind: 'house' });
+letters.forEach((l, i) => parts.push({ geo: build(l.items), kind: 'letter', idx: i, cx: ((l.x0 + l.x1) / 2 - CX) * S }));
+const reflMat = mat.clone(); reflMat.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)]; reflMat.transparent = true; reflMat.opacity = .38; reflMat.depthWrite = false; reflMat.emissiveIntensity = .35;
+const solid = new THREE.Group(), refl = new THREE.Group();
+refl.scale.y = -1; refl.renderOrder = 1;
+for (const p of parts) {
+  p.mesh = new THREE.Mesh(p.geo, mat); solid.add(p.mesh);
+  p.rmesh = new THREE.Mesh(p.geo, reflMat); p.rmesh.renderOrder = 1; refl.add(p.rmesh);
+}
+scene.add(solid, refl);
+
+// ---------- gerbes d'eau
+const N = 900, spPos = new Float32Array(N * 3), spray = [];
+for (let i = 0; i < N; i++) {
+  const burst = i < 600 ? -1 : (i - 600) % letters.length;          // -1 = la maison, sinon une lettre
+  const a = rnd() * Math.PI * 2;
+  spray.push({ burst, x: burst < 0 ? (rnd() - .5) * 13 : 0, z: (rnd() - .5) * 2.2, vx: Math.cos(a) * (1 + rnd() * 3), vz: Math.sin(a) * (1 + rnd() * 3),
+               vy: (burst < 0 ? 7 : 4) + rnd() * (burst < 0 ? 9 : 4), d: rnd() * .25 });
+}
+const spGeo = new THREE.BufferGeometry(); spGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+const spMat = new THREE.PointsMaterial({ color: col(P.c), size: .13, transparent: true, opacity: .85, depthWrite: false });
+const sprayPts = new THREE.Points(spGeo, spMat); scene.add(sprayPts);
+
+// ---------- lumières
+scene.add(new THREE.HemisphereLight(col(P.b), col(P.bg), .8));
+const key = new THREE.DirectionalLight(col(P.a), 2.6); key.position.set(0, 14, -90); scene.add(key);
+const rim = new THREE.DirectionalLight(col(P.c), 1.0); rim.position.set(50, 30, 60); scene.add(rim);
+const fill = new THREE.DirectionalLight(col(P.b), .55); fill.position.set(-40, 10, 40); scene.add(fill);
+const glow = new THREE.PointLight(col(P.a), 0, 50, 1.6); scene.add(glow);
+
+// ---------- typographie
+function textPlane(lines, height, color, font = 'Koko', weight = 400, track = 0, hud = false) {
+  const c = document.createElement('canvas'); const x = c.getContext('2d');
+  const fs = 220; x.font = `${weight} ${fs}px ${font}`;
+  const wmax = Math.max(...lines.map(l => x.measureText(l).width + track * l.length));
+  c.width = Math.ceil(wmax + 80); c.height = Math.ceil(lines.length * fs * 1.02 + 60);
+  x.font = `${weight} ${fs}px ${font}`; x.fillStyle = color; x.textBaseline = 'top';
+  lines.forEach((l, i) => {
+    let w = x.measureText(l).width + track * (l.length - 1), px = (c.width - w) / 2;
+    for (const ch of l) { x.fillText(ch, px, 30 + i * fs * 1.02); px += x.measureText(ch).width + track; }
+  });
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const h = height * lines.length, w = h * c.width / c.height;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, depthTest: !hud }));
+  if (hud) { m.renderOrder = 10; camera.add(m); } else scene.add(m);
+  return m;
+}
+const words = [
+  { m: textPlane(['UNE', 'MAISON'], 1.15, P.c), p: [0, 5.0, 70] },
+  { m: textPlane(['LA MER'], 1.3, P.b), p: [.8, 3.6, 54] },
+  { m: textPlane(['LA NUIT'], 1.3, P.a), p: [-.6, 4.8, 38] },
+];
+words.forEach(w => w.m.position.set(...w.p));
+// titres en surimpression (ancrés à la caméra) : à 10 unités, l'écran fait ~8.5 x 15
+const hudTop = textPlane(['LINE-UP BIENTOT'], .3, P.b, 'Koko', 400, 0, true);
+const hudSlogan = textPlane(['FAIS COMME CHEZ TOI'], .4, P.c, 'Koko', 400, 0, true);
+const hudInfo = textPlane(['JUIN 2028   CLOS DE PROVENCE   NIMES'], .12, P.c, 'StolzlB', 700, 24, true);
+const hudKicker = textPlane(['PREMIERE EDITION'], .1, P.c, 'StolzlB', 700, 30, true);
+hudTop.position.set(0, 3.25, -10); hudSlogan.position.set(0, -2.7, -10); hudInfo.position.set(0, -3.2, -10); hudKicker.position.set(0, 3.65, -10);
+
+// ---------- post
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(W / 2, H / 2), .32, .55, .95));
+composer.addPass(new OutputPass());
+
+// ---------- animation
+const LIFT = 0.5;                                     // hauteur finale des lettres au-dessus de l'eau
+const LET_START = 11.0;
+window.renderAt = (t) => {
+  seaU.t.value = t; starU.t.value = t; sky.material.uniforms.t.value = t;
+  sun.position.y = lerp(9, -14, eio(t / END)); halo.position.y = sun.position.y + 3; halo.material.uniforms.k.value = lerp(1, .45, t / END);
+
+  // maison : sort de l'eau sur le drop, puis monte pour laisser place aux lettres
+  const rise = eout((t - DROP + .25) / 1.7);
+  const lettersK = eio((t - LET_START) / 2.2);
+  const houseY = lerp(-HOUSE_TOP - 2, -HOUSE_BOTTOM + .25, rise) + lerp(0, HOUSE_BOTTOM + LIFT - .25, lettersK) + Math.sin(t * 1.25) * .12 * rise * (1 - lettersK);
+  const yaw = lerp(-.8, 0, eio((t - DROP) / 3)) + Math.sin(t * .45) * .05 * (1 - lettersK);
+  const p0 = parts[0]; p0.mesh.position.y = houseY; p0.mesh.rotation.y = yaw; p0.mesh.visible = t > DROP - .35;
+  let lastLetterY = -99;
+  parts.slice(1).forEach((p, i) => {
+    const k = eout((t - LET_START - .35 - i * .14) / .9);
+    const y = lerp(-LET_TOP - 1.5, LIFT, k); p.mesh.position.y = y; p.mesh.visible = k > 0;
+    p.mesh.rotation.x = lerp(-.5, 0, k);
+  });
+  parts.forEach(p => { p.rmesh.position.copy(p.mesh.position); p.rmesh.position.y = p.mesh.position.y; p.rmesh.rotation.copy(p.mesh.rotation); p.rmesh.visible = p.mesh.visible; });
+  refl.position.x = Math.sin(t * 2.3) * .06; refl.scale.x = 1 + Math.sin(t * 1.7) * .01;
+  mat.emissiveIntensity = .1 + .3 * pulse(t); reflMat.emissiveIntensity = .3 + .3 * pulse(t);
+  glow.intensity = (t > DROP - .2 ? 55 : 0) * (.6 + .5 * pulse(t)); glow.position.set(0, houseY + HOUSE_BOTTOM + 4, 5);
+  seaU.glow.value = cl((t - DROP + .2) / 1) * (.7 + .5 * pulse(t));
+  seaU.ripple.value = t > DROP - .25 ? (t - DROP + .25) * 10 : 0;
+  seaU.ripple2.value = t > LET_START + .3 ? (t - LET_START - .3) * 9 : 0;
+
+  // gerbes
+  for (let i = 0; i < N; i++) {
+    const s = spray[i];
+    const t0 = s.burst < 0 ? DROP - .1 + s.d : LET_START + .35 + s.burst * .14 + .3 + s.d * .5;
+    const dt = t - t0; let x = 0, y = -50, z = 0;
+    if (dt > 0) {
+      const bx = s.burst < 0 ? s.x : parts[1 + s.burst].cx;
+      x = bx + s.vx * dt; z = s.z + s.vz * dt; y = s.vy * dt - 9 * dt * dt;
+      if (y < 0) y = -50;
+    }
+    spPos[i * 3] = x; spPos[i * 3 + 1] = y; spPos[i * 3 + 2] = z;
+  }
+  spGeo.attributes.position.needsUpdate = true;
+
+  // caméra
+  let pos, look;
+  const hc = houseY + HOUSE_BOTTOM + (HOUSE_TOP - HOUSE_BOTTOM) / 2;
+  if (t < DROP) {
+    const k = t / DROP;
+    pos = new THREE.Vector3(Math.sin(t * .55) * .9, 2.3 + Math.sin(t * 1.05) * .22, lerp(96, 30, eio(k) * .3 + k * .7));
+    look = new THREE.Vector3(Math.sin(t * .55) * .4, 3.2 + 2.5 * eio((t - 4) / 2), pos.z - 32);
+  } else if (t < LET_START) {
+    const k = eio((t - DROP) / (LET_START - DROP)), a = lerp(0, -1.25, k), r = lerp(30, 25, k);
+    pos = new THREE.Vector3(Math.sin(a) * r, lerp(2.4, 3.6, k), Math.cos(a) * r);
+    look = new THREE.Vector3(0, lerp(5, hc, eio((t - DROP) / 1.5)), 0);
+  } else {
+    const k = eio((t - LET_START) / (END - LET_START - .6)), a = lerp(-1.25, 0, k), r = lerp(25, 37, k);
+    pos = new THREE.Vector3(Math.sin(a) * r, lerp(3.6, 5.6, k), Math.cos(a) * r);
+    look = new THREE.Vector3(0, lerp(hc, (LIFT + houseY + HOUSE_TOP) / 2 + .6, k), 0);
+  }
+  camera.position.copy(pos); camera.lookAt(look);
+  camera.rotation.z += Math.sin(t * .6) * .012;
+
+  // mots qu'on longe
+  words.forEach(w => { w.m.quaternion.copy(camera.quaternion); const d = camera.position.z - w.m.position.z;
+    w.m.material.opacity = .95 * cl((d - 7) / 5) * cl((36 - d) / 9); w.m.visible = t < DROP + 1; });
+
+  // titres
+  const hud = (m, st, dur = .6) => { const k = eout((t - st) / dur); m.material.opacity = k * (1 - eio((t - (END - .45)) / .4)); m.visible = k > 0; m.position.y = m.userData.y0 - .25 * (1 - k); };
+  [hudTop, hudSlogan, hudInfo, hudKicker].forEach(m => { if (m.userData.y0 === undefined) m.userData.y0 = m.position.y; });
+  hud(hudKicker, 12.2); hud(hudTop, 12.4); hud(hudSlogan, 12.7); hud(hudInfo, 13.0);
+
+  composer.render();
+  return true;
+};
+window.ready = true;
+</script>
+</body></html>

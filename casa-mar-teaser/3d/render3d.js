@@ -7,7 +7,7 @@ const fs = require('fs');
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   p.on('pageerror', e => console.log('ERR', e.message)); p.on('console', m => m.type() === 'error' && console.log('CONSOLE', m.text()));
-  await p.goto(`http://localhost:8790/index.html?id=${id}`);
+  await p.goto(`http://localhost:8790/${process.env.PAGE || 'index.html'}?id=${id}`);
   await p.waitForFunction(() => window.ready === true, null, { timeout: 120000 });
   const times = list ? list.split(',').map(Number) : Array.from({ length: Math.round(15 * fps) }, (_, i) => i / fps);
   let i = 0; const t0 = Date.now();
