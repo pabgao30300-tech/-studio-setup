@@ -119,6 +119,21 @@ def tunnel(cv, t, speed=0.18, n=9, color=None, strength=1.0, cy=960):
         a = 150 * strength * math.sin(math.pi * k) ** 1.2
         if a > 2: house_line(d, W / 2, cy, size, color, a, width=2 if k < .7 else 3)
 
+# nuit étoilée : points aux couleurs de la charte, qui scintillent et dérivent doucement vers nous
+NIGHT_STARS = [(rng.uniform(-1, 1), rng.uniform(-1, 1), rng.uniform(0, 1), rng.integers(0, 3), rng.uniform(0, 6.3))
+               for _ in range(260)]
+def starfield(cv, t, speed=0.03, strength=1.0, cy=960):
+    d = ImageDraw.Draw(cv, "RGBA")
+    cols = [C["a"], C["b"], C["c"]]
+    for x, y, z0, ci, ph in NIGHT_STARS:
+        z = (z0 + t * speed) % 1.0                       # profondeur : 0 loin -> 1 près
+        sc = 0.35 + 1.4 * z ** 1.6
+        px, py = W / 2 + x * W * 0.62 * sc, cy + y * H * 0.55 * sc
+        r = 1.6 + 4.2 * z ** 2
+        tw = 0.55 + 0.45 * math.sin(t * (1.5 + ci) + ph)
+        a = int(255 * strength * tw * min(1, z * 4) * min(1, (1 - z) * 6))
+        if a > 6: d.ellipse((px - r, py - r, px + r, py + r), fill=tuple(int(v) for v in cols[ci]) + (a,))
+
 def interior_bg(cv, color=None):
     cv.paste(Image.new("RGBA", (W, H), tuple(int(v) for v in (NIGHT * 0.8 if color is None else color)) + (255,)))
 
@@ -181,7 +196,7 @@ def frame(n):
     elif b < DROP:                                          # dedans : on avance dans la maison
         k = (b - 22) / (DROP - 22)
         interior_bg(cv)
-        tunnel(cv, t, speed=0.12 + 0.25 * k ** 2, strength=0.5 + 0.5 * k)
+        starfield(cv, t, speed=0.025 + 0.06 * k ** 2, strength=0.7 + 0.3 * k)
         words(cv, "ce soir", LIGHT, 70, P["c"], 560, (b - 22.5) / 1.6 * (1 - clamp((b - 27.5) / 1)))
         words(cv, "tu le connais", LIGHT, 70, P["c"], 560, (b - 28.5) / 1.6)
         tiles(cv, b)
@@ -200,7 +215,7 @@ def frame(n):
         else:
             lt2 = t - 44 * BEAT
             interior_bg(cv)
-            tunnel(cv, t, speed=0.08, strength=0.35, cy=700)
+            starfield(cv, t, speed=0.02, strength=0.8, cy=760)
             big_name(cv, 9, 360, slam=False)
             d = ImageDraw.Draw(cv)
             d.line((140, 1010, W - 140, 1010), fill=P["c"], width=2)
