@@ -123,7 +123,7 @@ def scene_intro(cv, t):        # beats 0-3 : la maison se dessine
     if h > 0:
         part = ic.crop((0, ic.height - h, ic.width, ic.height))
         cv.alpha_composite(part, (int(W / 2 - ic.width / 2), int(820 - ic.height / 2 + ic.height - h)))
-    msg = "quelque chose arrive"
+    msg = "le line up arrive"
     n = int(clamp((t - 0.7) / 1.0) * len(msg))
     if n:
         im = text_img(msg[:n], BOLD, 54, p["c"], tracking=4)
@@ -179,7 +179,7 @@ def scene_flicker(cv, t):      # beats 10-15 : le logo en variantes de la charte
     im = text_img("première edition", LIGHT, 74, p["c"], tracking=4)
     paste_c(cv, im, W / 2, 1300, alpha=eout((t) / 0.6))
     # lower tag pill
-    tag = ["STAFF", "VIP", "EARLY"][i % 3]
+    tag = ["LINE-UP BIENTOT", "JUIN 2028", "NIMES"][i % 3]
     ti = text_img(tag, KOKO, 60, pill_txt)
     bw = ti.width + 80
     rrect(cv, (W / 2 - bw / 2, 1400, W / 2 + bw / 2, 1490), 45, p["b"])
@@ -240,9 +240,9 @@ def ticket(p):
     B = lambda s, z=52: text_img(s, KOKO, z, p["bg"])
     def put(img, x, y): im.alpha_composite(img, (int(x), int(y)))
     put(L("event"), 70, 80); put(B("CASA MAR"), 70, 145)
-    put(L("date"), 540, 80); put(B("BIENTOT"), 540, 145)
-    put(L("location"), 70, 280); put(B("CRS DE PROVENCE"), 70, 345)
-    e = text_img("ENTRY BEFORE 14PM", BOLD, 40, p["bg"], 2); put(e, 70, 480)
+    put(L("date"), 540, 80); put(B("JUIN 2028"), 540, 145)
+    put(L("location"), 70, 280); put(B("CLOS DE PROVENCE"), 70, 345)
+    e = text_img("EARLY AVANT 14H", BOLD, 40, p["bg"], 2); put(e, 70, 480)
     put(B("22€", 120), 70, 545)
     ic = logo("icon", p["bg"], 200); put(ic, w - 280, 520)
     put(B("CASA MAR", 120), (w - B("CASA MAR", 120).width) / 2, 935)
@@ -254,21 +254,24 @@ def scene_info(cv, t):         # beats 22-27 : 22€ / location
     i = int(beat_of(t)); lt = t - i * BEAT
     if i < 3:
         cv.paste(Image.new("RGBA", (W, H), p["bg"]))
-        sc = 1.0 + 0.25 * (1 - eout(lt / 0.15)) if i == 0 else 1.0 + 0.06 * pulse(t)
-        big_text(cv, "22€", p["a"], 860, maxw=880, maxh=600, scale=sc)
-        im = text_img("ENTRY BEFORE 14PM", BOLD, 60, p["c"], tracking=6)
-        paste_c(cv, im, W / 2, 1260, alpha=eout((t - 0.25) / 0.3))
+        sc = 1.0 + 0.25 * (1 - eout(lt / 0.15))
+        price, label, col = [("22€", "EARLY AVANT 14H", "a"), ("30€", "PLEIN TARIF", "c"), ("60€", "VIP", "b")][i]
+        big_text(cv, price, p[col], 860, maxw=880, maxh=600, scale=sc)
+        im = text_img(label, BOLD, 64, p["c"], tracking=6)
+        paste_c(cv, im, W / 2, 1260, alpha=eout(lt / 0.15))
         waves(cv, p["b"], 1420, t, amp=16, wl=140, thick=10, rows=2, gap=40, x0=280, x1=800)
     else:
         cv.paste(Image.new("RGBA", (W, H), p["b"]))
         tt = t - 3 * BEAT
         im = text_img("location", LIGHT, 70, p["bg"], 6)
         paste_c(cv, im, W / 2, 640, alpha=eout(tt / 0.3))
-        for j, word in enumerate(["CRS DE", "PROVENCE"]):
+        for j, word in enumerate(["CLOS DE", "PROVENCE"]):
             k = eout((tt - 0.12 - j * 0.15) / 0.35)
             big_text(cv, word, p["bg"], 840 + j * 250, maxw=900, maxh=230, scale=0.6 + 0.4 * k, alpha=k)
-        pin = logo("icon", p["bg"], 180)
-        paste_c(cv, pin, W / 2, 1330 + 16 * math.sin(t * 6), alpha=eout((tt - 0.4) / 0.3))
+        im = text_img("nimes", LIGHT, 90, p["bg"], 8)
+        paste_c(cv, im, W / 2, 1300, alpha=eout((tt - 0.35) / 0.3))
+        pin = logo("icon", p["bg"], 160)
+        paste_c(cv, pin, W / 2, 1460 + 16 * math.sin(t * 6), alpha=eout((tt - 0.5) / 0.3))
 
 def scene_end(cv, t):          # beats 28-31 : lockup final
     p = PAL
@@ -276,16 +279,22 @@ def scene_end(cv, t):          # beats 28-31 : lockup final
     for i in range(4):
         waves(cv, p["b"], 1500 + i * 70, t + i * 0.4, amp=12, wl=200, thick=7, rows=1, alpha=70 + 40 * i)
     k = eback(t / 0.5, 1.4)
-    lg = logo("h", p["a"], 860)
-    paste_c(cv, lg, W / 2, 820, scale=0.6 + 0.4 * k, alpha=clamp(t / 0.15))
-    im = text_img("première edition", LIGHT, 82, p["c"], tracking=4)
-    paste_c(cv, im, W / 2, 1150, alpha=eout((t - 0.4) / 0.4))
-    tag = text_img("DATE BIENTOT", KOKO, 70, p["bg"])
+    lg = logo("h", p["a"], 780)
+    paste_c(cv, lg, W / 2, 660, scale=0.6 + 0.4 * k, alpha=clamp(t / 0.15))
+    big_text(cv, "JUIN 2028", p["c"], 1010, maxw=700, maxh=150, alpha=eout((t - 0.3) / 0.3))
+    im = text_img("clos de provence  nimes", LIGHT, 56, p["c"], tracking=4)
+    paste_c(cv, im, W / 2, 1120, alpha=eout((t - 0.45) / 0.3))
+    tag = text_img("LINE-UP BIENTOT", KOKO, 76, p["bg"])
     bw = tag.width + 90
-    a = eout((t - 0.8) / 0.3)
+    a = eout((t - 0.6) / 0.25)
     if a > 0:
-        rrect(cv, (W / 2 - bw / 2, 1265, W / 2 + bw / 2, 1365), 50, p["b"])
-        paste_c(cv, tag, W / 2, 1315)
+        pop = 1 + 0.15 * (1 - eout((t - 0.6) / 0.3)) + 0.05 * pulse(t)
+        pill = Image.new("RGBA", (int(bw), 110), (0, 0, 0, 0))
+        ImageDraw.Draw(pill).rounded_rectangle((0, 0, bw - 1, 109), 55, fill=p["b"])
+        pill.alpha_composite(tag, (45, (110 - tag.height) // 2))
+        paste_c(cv, pill, W / 2, 1260, scale=pop, rot=-3)
+    im = text_img("MAJEURS UNIQUEMENT", BOLD, 40, p["a"], tracking=8)
+    paste_c(cv, im, W / 2, 1390, alpha=eout((t - 0.9) / 0.3))
     if t > 1.9:                      # fade out the very end
         cv.alpha_composite(Image.new("RGBA", (W, H), hexrgb(p["bg"]) + (int(255 * ein((t - 1.9) / 0.1)),)))
 

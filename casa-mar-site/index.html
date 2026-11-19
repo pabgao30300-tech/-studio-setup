@@ -143,6 +143,26 @@ button{font:inherit;color:inherit;cursor:pointer}
 .lineup .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:30px}
 @media (max-width:640px){.act{grid-template-columns:44px 1fr}.act .when{grid-column:2;text-align:left}}
 
+
+/* ---------- line-up : ça arrive ---------- */
+.live{color:var(--b);text-decoration:none;border-color:var(--b)}
+.live i{width:9px;height:9px;border-radius:50%;background:currentColor;display:inline-block;animation:blink 1.1s infinite}
+.soon{position:relative}
+.soon::after{content:"";background:var(--b);width:7px;height:7px;border-radius:50%;position:absolute;top:6px;right:6px;animation:blink 1.1s infinite}
+@keyframes blink{50%{opacity:.2;transform:scale(.6)}}
+.lu-side{display:grid;gap:16px;max-width:36ch}
+.lu-side p{margin:0}
+.reveal-count{display:flex;align-items:baseline;gap:14px}
+.reveal-count .disp{font-size:clamp(3.4rem,6vw,5.4rem)}
+.meter{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.meter i{height:14px;border-radius:999px;border:3px solid var(--on-a);background:repeating-linear-gradient(-45deg,transparent 0 5px,color-mix(in srgb,var(--on-a) 25%,transparent) 5px 8px);background-size:200% 100%;animation:stripes 1.6s linear infinite}
+@keyframes stripes{to{background-position:-22px 0}}
+.inband{rotate:1.5deg;margin:0 calc(-1 * var(--gut) - 20px) 50px;background:var(--on-a);color:var(--a);box-shadow:none}
+.act .name{filter:blur(9px);opacity:.75;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .4s}
+.act:hover .name{filter:blur(5px)}
+.act .when b.lock{display:inline-block;padding:6px 12px;border-radius:999px;background:var(--on-a);color:var(--a);font-weight:700;margin-bottom:4px;animation:blink 1.6s infinite}
+.act:hover .when b.lock{background:var(--a);color:var(--on-a)}
+
 /* ---------- billetterie ---------- */
 .tickets{background:var(--bg2)}
 .tix{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(18px,2.4vw,34px);perspective:1100px}
@@ -263,7 +283,7 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
 <header class="nav" id="nav">
   <a class="brand" href="#top" aria-label="Casa Mar, retour en haut"><svg fill="currentColor"><use href="#house"/></svg><span>Casa Mar</span></a>
   <nav class="links" aria-label="Sections">
-    <a href="#line-up">Line-up</a><a href="#billetterie">Billetterie</a><a href="#merch">Merch</a><a href="#infos">Infos</a>
+    <a href="#line-up" class="soon">Line-up</a><a href="#billetterie">Billetterie</a><a href="#merch">Merch</a><a href="#infos">Infos</a>
   </nav>
   <div class="amb" role="group" aria-label="Ambiance de couleurs">
     <button data-set="1" aria-pressed="true" title="Ambiance Nuit d'été" style="--c1:#E8B04A;--c2:#7BB1DD"><span class="sr">Nuit d'été</span></button>
@@ -276,7 +296,7 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
 <main id="top">
 <section class="hero" aria-labelledby="h1">
   <div>
-    <div class="kicker"><span class="tag lab">Première édition</span><span class="tag lab">Nîmes · Sept. 2027</span></div>
+    <div class="kicker"><span class="tag lab">Première édition</span><span class="tag lab">Nîmes · Juin 2028</span><a class="tag lab live" href="#line-up"><i></i>Line-up bientôt dévoilé</a></div>
     <h1 class="disp" id="h1" data-split><span class="line">Fais</span><span class="line">comme</span><span class="line">chez toi</span></h1>
     <p class="sub">Une maison, la mer, la nuit. <strong>De 12h à 01h</strong>, tu poses ta serviette et tu restes jusqu'au bout.</p>
     <div class="ctas"><a class="btn mag" href="#billetterie">Prendre ma place <span aria-hidden="true">→</span></a><a class="btn ghost mag" href="#line-up">Voir le line-up</a></div>
@@ -287,7 +307,7 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
   </div>
   <div class="sticker s1" aria-hidden="true">22€<small>avant 14h</small></div>
   <div class="sticker s2" aria-hidden="true">12h<br>01h<small>non-stop</small></div>
-  <div class="sticker s3" aria-hidden="true">la mer<small>la nuit</small></div>
+  <div class="sticker s3" aria-hidden="true">Line-up<small>arrive bientôt</small></div>
   <p class="hint lab" aria-hidden="true">← attrape les stickers</p>
   <canvas class="waves" id="wavesTop" aria-hidden="true"></canvas>
 </section>
@@ -305,50 +325,55 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
 
 <section class="room lineup" id="line-up" aria-labelledby="lu-h">
   <div class="room-head">
-    <h2 class="disp" id="lu-h">Line-up</h2>
-    <p><span class="tag lab">5 artistes</span><br><br>Les noms tombent un par un. Passe la souris sur une ligne pour tenter ta chance.</p>
+    <h2 class="disp" id="lu-h">Le line-up<br>arrive</h2>
+    <div class="lu-side">
+      <div class="reveal-count"><span class="disp">0/5</span><span class="lab">artistes dévoilés</span></div>
+      <div class="meter" role="img" aria-label="0 artiste dévoilé sur 5"><i></i><i></i><i></i><i></i><i></i></div>
+      <p>Cinq artistes, cinq annonces. Les noms tombent un par un dans les prochaines semaines : garde un œil ici.</p>
+    </div>
   </div>
+  <div class="band inband" aria-hidden="true"><div class="track" data-speed="1.4" data-phrase="Line-up bientôt|Cinq artistes|Annonce imminente|Juin 2028"></div></div>
   <ol class="acts">
-    <li class="act"><span class="n">01</span><span class="name" data-scramble="Artiste 1">Artiste 1</span><span class="when">Annonce<i>bientôt</i></span></li>
-    <li class="act"><span class="n">02</span><span class="name" data-scramble="Artiste 2">Artiste 2</span><span class="when">Annonce<i>bientôt</i></span></li>
-    <li class="act"><span class="n">03</span><span class="name" data-scramble="Artiste 3">Artiste 3</span><span class="when">Annonce<i>bientôt</i></span></li>
-    <li class="act"><span class="n">04</span><span class="name" data-scramble="Artiste 4">Artiste 4</span><span class="when">Annonce<i>bientôt</i></span></li>
-    <li class="act"><span class="n">05</span><span class="name" data-scramble="Artiste 5">Artiste 5</span><span class="when">Annonce<i>bientôt</i></span></li>
+    <li class="act"><span class="n">01</span><span class="name" data-scramble role="img" aria-label="Artiste 1, nom bientôt dévoilé">Artiste 1</span><span class="when"><b class="lock">Bientôt</b><i>Prochaine annonce</i></span></li>
+    <li class="act"><span class="n">02</span><span class="name" data-scramble role="img" aria-label="Artiste 2, nom bientôt dévoilé">Artiste 2</span><span class="when"><b class="lock">Bientôt</b><i>En attente</i></span></li>
+    <li class="act"><span class="n">03</span><span class="name" data-scramble role="img" aria-label="Artiste 3, nom bientôt dévoilé">Artiste 3</span><span class="when"><b class="lock">Bientôt</b><i>En attente</i></span></li>
+    <li class="act"><span class="n">04</span><span class="name" data-scramble role="img" aria-label="Artiste 4, nom bientôt dévoilé">Artiste 4</span><span class="when"><b class="lock">Bientôt</b><i>En attente</i></span></li>
+    <li class="act"><span class="n">05</span><span class="name" data-scramble role="img" aria-label="Artiste 5, nom bientôt dévoilé">Artiste 5</span><span class="when"><b class="lock">Bientôt</b><i>En attente</i></span></li>
   </ol>
-  <div class="foot lab"><span>12h → 01h</span><span>Sept. 2027 · Nîmes</span></div>
+  <div class="foot lab"><span>12h → 01h</span><span>Juin 2028 · Clos de Provence, Nîmes</span></div>
 </section>
 
 <section class="room tickets" id="billetterie" aria-labelledby="bi-h">
   <div class="room-head">
     <h2 class="disp" id="bi-h" style="color:var(--a)">Billetterie</h2>
-    <p>Un billet, un bracelet. Le tarif early est réservé à ceux qui passent la porte avant 14h.</p>
+    <p>Un billet, un bracelet. Early à 22€ si tu passes la porte avant 14h, 30€ en plein tarif, 60€ en VIP. Réservé aux majeurs.</p>
   </div>
   <div class="tix">
     <article class="ticket tilt" style="--wc:var(--b)">
       <div class="wrist" aria-hidden="true"><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg><span>Early</span><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg></div>
-      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Sept. 2027</div></div></div>
+      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Juin 2028</div></div></div>
       <div class="row"><div><div class="k">location</div><div class="v">Nîmes</div></div><div><div class="k">accès</div><div class="v">Avant 14h</div></div></div>
       <div class="price">22€<small>Entrée avant 14h</small></div>
       <div class="perf" aria-hidden="true"></div>
-      <ul><li>Bracelet Early</li><li>Accès toute la journée, jusqu'à 01h</li></ul>
+      <ul><li>Bracelet Early</li><li>Réservé aux majeurs</li><li>Accès toute la journée, jusqu'à 01h</li></ul>
       <button class="btn mag" data-book="Early">Réserver Early</button>
     </article>
     <article class="ticket alt tilt" style="--wc:var(--a)">
       <div class="wrist" aria-hidden="true"><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg><span>Casa Mar</span><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg></div>
-      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Sept. 2027</div></div></div>
+      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Juin 2028</div></div></div>
       <div class="row"><div><div class="k">location</div><div class="v">Nîmes</div></div><div><div class="k">accès</div><div class="v">12h → 01h</div></div></div>
-      <div class="price"><span class="tbc">--€</span><small>Plein tarif · prix à venir</small></div>
+      <div class="price">30€<small>Plein tarif</small></div>
       <div class="perf" aria-hidden="true"></div>
-      <ul><li>Bracelet journée</li><li>Entrée à l'heure que tu veux</li></ul>
+      <ul><li>Bracelet journée</li><li>Réservé aux majeurs</li><li>Entrée à l'heure que tu veux</li></ul>
       <button class="btn mag" data-book="Plein tarif">Réserver</button>
     </article>
     <article class="ticket alt2 tilt" style="--wc:var(--ink)">
       <div class="wrist" aria-hidden="true"><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg><span>VIP</span><svg fill="currentColor"><use href="#house"/></svg><svg fill="currentColor"><use href="#house"/></svg></div>
-      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Sept. 2027</div></div></div>
+      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div><div class="k">date</div><div class="v">Juin 2028</div></div></div>
       <div class="row"><div><div class="k">location</div><div class="v">Nîmes</div></div><div><div class="k">accès</div><div class="v">12h → 01h</div></div></div>
-      <div class="price"><span class="tbc">--€</span><small>VIP · prix à venir</small></div>
+      <div class="price">60€<small>VIP</small></div>
       <div class="perf" aria-hidden="true"></div>
-      <ul><li>Bracelet VIP</li><li>Avantages <span class="tbc">à annoncer</span></li></ul>
+      <ul><li>Bracelet VIP</li><li>Réservé aux majeurs</li><li>Avantages <span class="tbc">à annoncer</span></li></ul>
       <button class="btn mag" data-book="VIP">Réserver VIP</button>
     </article>
   </div>
@@ -371,19 +396,21 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
     <p>Tout ce qu'il faut savoir avant de passer la porte.</p>
   </div>
   <div class="tiles">
-    <div class="tile"><span class="lab">Quand</span><div><div class="disp">Sept. 2027</div><p>Date exacte <span class="tbc">annoncée bientôt</span>.</p></div></div>
-    <div class="tile"><span class="lab">Où</span><div><div class="disp">Nîmes</div><p><span class="tbc">Cours de Provence</span>, adresse précise avec la date.</p></div></div>
+    <div class="tile"><span class="lab">Quand</span><div><div class="disp">Juin 2028</div><p>Jour exact <span class="tbc">annoncé bientôt</span>.</p></div></div>
+    <div class="tile"><span class="lab">Où</span><div><div class="disp">Nîmes</div><p>Au Clos de Provence.</p></div></div>
     <div class="tile"><span class="lab">Horaires</span><div><div class="disp">12h → 01h</div><p>Treize heures de son, du déjeuner à la nuit.</p></div></div>
-    <div class="tile"><span class="lab">Early</span><div><div class="disp">22€</div><p>Pour toute entrée avant 14h.</p></div></div>
+    <div class="tile"><span class="lab">Tarifs</span><div><div class="disp">Dès 22€</div><p>Early 22€ avant 14h · Plein tarif 30€ · VIP 60€.</p></div></div>
+    <div class="tile"><span class="lab">Âge</span><div><div class="disp">18+</div><p>Événement réservé aux majeurs.</p></div></div>
   </div>
   <div class="faq">
     <h3 class="disp">Questions</h3>
     <div>
-      <details><summary>Je peux arriver et repartir quand je veux&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Les portes ouvrent à 12h et la maison ferme à 01h. Le tarif early à 22€ n'est valable que si tu entres avant 14h.</p></details>
+      <details><summary>C'est quand, le line-up&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Très bientôt. Les cinq artistes sont annoncés un par un, et le compteur du line-up se met à jour à chaque annonce.</p></details>
+      <details><summary>Je peux arriver et repartir quand je veux&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Les portes ouvrent à 12h et la maison ferme à 01h. Le tarif early à 22€ n'est valable que si tu entres avant 14h. Sinon, c'est 30€ en plein tarif ou 60€ en VIP.</p></details>
       <details><summary>Comment je récupère mon bracelet&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Montre le QR code de ton billet à l'entrée. On te pose le bracelet qui correspond à ton billet : Early, journée ou VIP.</p></details>
       <details><summary>Le merch, je le paie où&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Mets tes pièces dans ta sélection sur le site, puis récupère-les au stand merch sur place. Le paiement en ligne n'est <span class="tbc">pas encore ouvert</span>.</p></details>
-      <details><summary>Comment venir&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Les infos d'accès, de stationnement et de transports en commun <span class="tbc">sortent avec l'adresse exacte</span>.</p></details>
-      <details><summary>Je peux venir avec qui&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Avec qui tu veux. C'est le principe : fais comme chez toi. Les conditions d'âge sont <span class="tbc">à confirmer</span>.</p></details>
+      <details><summary>Comment venir&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Rendez-vous au Clos de Provence, à Nîmes. Les infos de stationnement et de transports en commun <span class="tbc">arrivent bientôt</span>.</p></details>
+      <details><summary>Il y a un âge minimum&nbsp;? <span class="pm" aria-hidden="true">+</span></summary><p>Oui : Casa Mar est réservé aux majeurs, 18 ans et plus. Prévois ta pièce d'identité.</p></details>
     </div>
   </div>
 </section>
@@ -391,7 +418,7 @@ details p{margin:14px 0 0;max-width:60ch;opacity:.85}
 <footer class="room foot">
   <h2 class="disp big" data-split><span>Fais comme</span><span>chez toi</span></h2>
   <svg class="logo-h" viewBox="0 0 2656 1458" fill="currentColor" role="img" aria-label="Casa Mar"><use href="#logo-h"/></svg>
-  <div class="cols lab"><span>Casa Mar · Première édition · Nîmes 2027</span><span><a href="#line-up">Line-up</a><a href="#billetterie">Billetterie</a><a href="#merch">Merch</a><a href="#infos">Infos</a></span></div>
+  <div class="cols lab"><span>Casa Mar · Première édition · Juin 2028 · Clos de Provence, Nîmes · 18+</span><span><a href="#line-up">Line-up</a><a href="#billetterie">Billetterie</a><a href="#merch">Merch</a><a href="#infos">Infos</a></span></div>
 </footer>
 </main>
 
@@ -497,28 +524,22 @@ words.innerHTML = words.textContent.split(' ').map(w => `<span class="w${HL.incl
 const wordEls = $$('.w', words);
 
 /* ---- marquees ---- */
-const phrase = ['Une maison', 'La mer', 'La nuit', 'Fais comme chez toi', 'Nîmes 2027'];
+const phrase = ['Une maison', 'La mer', 'La nuit', 'Line-up bientôt', 'Fais comme chez toi', 'Juin 2028'];
 $$('.track').forEach(t => {
-  const chunk = phrase.map(p => `<span>${p} ${house}</span>`).join('');
+  const chunk = (t.dataset.phrase ? t.dataset.phrase.split('|') : phrase).map(p => `<span>${p} ${house}</span>`).join('');
   t.innerHTML = chunk + chunk + chunk + chunk; t._x = 0;
 });
 
-/* ---- scramble line-up ---- */
-const GL = 'ABCDEFGIKLMORSTUVZ0123456789';
-$$('[data-scramble]').forEach(el => {
-  const row = el.closest('.act'); let raf;
-  row.addEventListener('mouseenter', () => {
-    if (reduce) return;
-    const target = '?????'; let f = 0; cancelAnimationFrame(raf);
-    const tick = () => {
-      f++;
-      el.textContent = [...el.dataset.scramble].map((c, i) => c === ' ' ? ' ' : (f > 18 + i * 2 ? (target[i % 5]) : GL[Math.random() * GL.length | 0])).join('');
-      if (f < 34) raf = requestAnimationFrame(tick); else el.textContent = 'Secret';
-    };
-    tick();
-  });
-  row.addEventListener('mouseleave', () => { cancelAnimationFrame(raf); el.textContent = el.dataset.scramble; });
-});
+/* ---- line-up : noms brouillés en continu, en attente d'annonce ---- */
+const GL = 'ABCDEFGIKLMORSTUVZ';
+const names = $$('[data-scramble]');
+const lens = [7, 9, 6, 8, 7];
+names.forEach((el, k) => { el._s = Array.from({ length: lens[k] }, () => GL[Math.random() * GL.length | 0]); el.textContent = el._s.join(''); });
+if (!reduce) setInterval(() => names.forEach(el => {
+  const hot = el.closest('.act').matches(':hover');
+  for (let j = 0; j < (hot ? 4 : 1); j++) el._s[Math.random() * el._s.length | 0] = GL[Math.random() * GL.length | 0];
+  el.textContent = el._s.join('');
+}), 110);
 
 /* ---- tilt des billets ---- */
 $$('.tilt').forEach(c => {
