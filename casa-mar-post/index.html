@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr" data-id="1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casa Mar · Billet en rouleau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : un article éditorial sur papier crème, une seule scène sombre pleine largeur
+   où vit l'imprimante à billets. Le reste se tait pour laisser parler l'objet. */
+@font-face{font-family:"Kokoschka";src:url(assets/fonts/Kokoschka-casa.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Stolzl";font-weight:700;src:url(assets/fonts/Stolzl-Bold-casa.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Stolzl";font-weight:300;src:url(assets/fonts/Stolzl-Light-casa.woff2) format("woff2");font-display:swap}
+:root{
+  --paper:#FFFEF1; --ink:#0B0F1E; --a:#E8B04A; --b:#7BB1DD; --stage:#0B0F1E; --muted:#5b5f6e; --rule:#0B0F1E22;
+  --display:"Kokoschka","Outfit",system-ui,sans-serif;
+  --label:"Stolzl","Outfit",system-ui,sans-serif;
+  --body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+[data-id="2"]{--ink:#0D0D11; --a:#D9203D; --b:#F4A195; --stage:#0D0D11; --rule:#0D0D1122}
+[data-id="3"]{--ink:#280D19; --a:#E4A479; --b:#E9F188; --stage:#280D19; --rule:#280D1922; --paper:#FFFEEB}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.2vw,19px);line-height:1.62;transition:background .4s}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+.lab{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem}
+
+/* en-tête du post */
+.top{max-width:1120px;margin:0 auto;padding:22px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--rule)}
+.top .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.3rem;color:var(--ink);text-decoration:none}
+.top .brand svg{width:30px;height:26px;color:var(--a)}
+.hero{padding:70px 0 34px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);margin-bottom:26px}
+.hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(2.6rem,7vw,4.8rem);line-height:.9;margin:0 0 22px;letter-spacing:-.01em;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--a)}
+.hero .dek{font-size:1.25em;font-weight:300;margin:0;max-width:34ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.tags span{border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px}
+
+/* article */
+article h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(1.8rem,3.4vw,2.4rem);line-height:.95;margin:64px 0 16px;display:flex;gap:14px;align-items:baseline}
+article h2 small{font-family:var(--label);font-weight:700;font-size:.8rem;letter-spacing:.12em;color:var(--a);-webkit-text-stroke:0}
+article p{margin:0 0 1.05em}
+article ul{padding-left:1.1em;margin:0 0 1.2em}
+article li{margin-bottom:.35em}
+.pull{font-family:var(--display);text-transform:uppercase;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1;margin:40px 0;padding-left:20px;border-left:5px solid var(--a)}
+table{width:100%;border-collapse:collapse;margin:10px 0 24px;font-variant-numeric:tabular-nums;font-size:.94em}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--muted)}
+td code{font-size:.92em;background:color-mix(in srgb,var(--a) 18%,transparent);padding:1px 6px;border-radius:5px}
+.tablewrap{overflow-x:auto}
+figure{margin:28px 0}
+figcaption{color:var(--muted);font-size:.86em;margin-top:10px}
+
+/* ---------- la scène ---------- */
+.stage{background:var(--stage);color:var(--paper);margin:40px auto;max-width:1120px;border-radius:28px;padding:26px;position:relative;overflow:hidden;transition:background .4s}
+.stage-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;position:relative;z-index:6}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1.5px solid color-mix(in srgb,var(--paper) 40%,transparent);background:transparent;color:var(--paper);border-radius:999px;padding:8px 14px;font-family:var(--label);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s,border-color .2s}
+.pill[aria-pressed="true"]{background:var(--paper);color:var(--stage);border-color:var(--paper)}
+.dots{display:flex;gap:8px;align-items:center}
+.dots button{width:24px;height:24px;border-radius:50%;border:2px solid var(--paper);padding:0;background:conic-gradient(var(--c1) 0 50%,var(--c2) 0)}
+.dots button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--stage),0 0 0 5px var(--paper)}
+.floor{position:relative;height:min(78vh,760px);min-height:600px;touch-action:none}
+.printer{position:absolute;left:50%;top:22px;transform:translateX(-50%);width:400px;max-width:92%;height:118px;border-radius:26px 26px 18px 18px;background:var(--a);z-index:4;
+  box-shadow:inset 0 -10px 0 color-mix(in srgb,#000 18%,var(--a)),0 18px 30px rgb(0 0 0/.35)}
+.printer .face{position:absolute;inset:16px 22px 34px;display:flex;align-items:center;justify-content:space-between;color:var(--stage)}
+.printer .face svg{width:46px;height:40px}
+.printer .face b{font-family:var(--display);font-weight:400;font-size:1.55rem}
+.printer .led{width:10px;height:10px;border-radius:50%;background:var(--stage);opacity:.35;transition:opacity .2s}
+.printer.busy .led{opacity:1;background:var(--paper);box-shadow:0 0 10px var(--paper)}
+.slot{position:absolute;left:50%;transform:translateX(-50%);top:126px;width:340px;max-width:82%;height:10px;border-radius:6px;background:#000;z-index:5;box-shadow:0 2px 0 rgb(255 255 255/.06)}
+.head{position:absolute;left:50%;transform:translateX(-50%);top:130px;width:300px;height:2px;background:var(--b);filter:blur(1px);opacity:0;z-index:6;transition:opacity .15s}
+.printer.busy ~ .head{opacity:.9}
+.strip{position:absolute;left:50%;top:131px;width:300px;margin-left:-150px;z-index:3;transform-origin:50% 0;cursor:grab;will-change:transform}
+.strip:active{cursor:grabbing}
+.window{overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;height:var(--fed,46px);filter:drop-shadow(0 14px 18px rgb(0 0 0/.35))}
+.window.torn{-webkit-mask:var(--zig-bottom);mask:var(--zig-bottom)}
+:root{
+  --zig-top:conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/14px 7px repeat-x,linear-gradient(#000 0 0) 0 7px/100% calc(100% - 6px) no-repeat;
+  --zig-bottom:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/14px 7px repeat-x,linear-gradient(#000 0 0) 0 0/100% calc(100% - 6px) no-repeat;
+}
+.roll{display:flex;flex-direction:column-reverse}
+.blank{height:46px;background:var(--paper)}
+.hint{position:absolute;left:50%;top:210px;transform:translateX(-50%);font-size:.8rem;opacity:.7;white-space:nowrap;z-index:2;transition:opacity .3s}
+.table{position:absolute;inset:auto 0 0 0;height:150px;background:linear-gradient(transparent,color-mix(in srgb,#000 30%,transparent));pointer-events:none}
+.piece{position:absolute;left:0;top:0;width:300px;z-index:7;-webkit-mask:var(--zig-top);mask:var(--zig-top);filter:drop-shadow(0 10px 12px rgb(0 0 0/.35));cursor:grab;touch-action:none}
+.piece.old{transition:opacity .8s;opacity:.0}
+.stage-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;position:relative;z-index:6}
+.act{display:flex;gap:8px;flex-wrap:wrap}
+.big{border:0;border-radius:999px;padding:13px 20px;background:var(--a);color:var(--stage);font-family:var(--label);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;transition:transform .15s}
+.big:active{transform:scale(.96)}
+.big.ghost{background:transparent;color:var(--paper);border:1.5px solid color-mix(in srgb,var(--paper) 50%,transparent)}
+.count{opacity:.75;font-size:.85rem}
+
+/* ---------- le billet (papier thermique) ---------- */
+.ticket{width:300px;height:430px;background:var(--paper);color:var(--stage);padding:22px 22px 0;position:relative;font-family:var(--body);user-select:none}
+.ticket::after{content:"";position:absolute;left:10px;right:10px;top:0;border-bottom:2px dashed color-mix(in srgb,var(--stage) 45%,transparent)}
+.ticket .row{display:flex;justify-content:space-between;gap:10px}
+.ticket .k{font-family:var(--label);font-weight:300;font-size:.78rem;line-height:1.1}
+.ticket .v{font-family:var(--display);font-size:1.08rem;line-height:1;margin-top:3px}
+.ticket .brandline{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--stage);padding-bottom:10px;margin-bottom:14px}
+.ticket .brandline b{font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1}
+.ticket .brandline svg{width:40px;height:34px;color:var(--a)}
+.ticket .grid{display:grid;gap:12px}
+.ticket .price{display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px}
+.ticket .price b{font-family:var(--display);font-weight:400;font-size:3.6rem;line-height:.8;color:var(--stage)}
+.ticket .tier{font-family:var(--label);font-weight:700;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;background:var(--a);color:var(--stage);border-radius:999px;padding:6px 10px}
+.ticket .qr{width:78px;height:78px;display:grid;grid-template-columns:repeat(11,1fr);gap:0;background:var(--paper)}
+.ticket .qr i{background:var(--stage)}
+.ticket .qr i.o{background:transparent}
+.ticket .bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}
+.ticket .num{font-family:var(--label);font-weight:700;font-size:.66rem;letter-spacing:.1em}
+.ticket .num span{display:block;font-family:var(--body);font-weight:400;font-size:.85rem;letter-spacing:.06em;margin-top:2px}
+.ticket .foot{font-size:.7rem;margin-top:10px;opacity:.8}
+.ticket .cut{position:absolute;right:12px;top:-9px;font-size:.7rem;opacity:.5}
+
+/* graphiques d'easing */
+.curves{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0 26px}
+.curve{border:1px solid var(--rule);border-radius:16px;padding:14px}
+.curve svg{width:100%;height:110px;display:block}
+.curve .dotline{height:16px;position:relative;margin-top:10px;border-radius:8px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.curve .dotline i{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--a);animation:var(--anim) 2.4s infinite}
+@keyframes c1{0%,15%{left:2px}55%,100%{left:calc(100% - 14px)}}
+@keyframes c2{0%,15%{left:2px}55%,100%{left:calc(100% - 14px)}}
+@keyframes c3{0%,15%{left:2px}55%,100%{left:calc(100% - 14px)}}
+.curve h4{margin:0 0 6px;font-family:var(--label);font-weight:700;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+.curve p{margin:6px 0 0;font-size:.85em;color:var(--muted)}
+
+.palettes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.palettes button{border:0;border-radius:16px;padding:0;overflow:hidden;text-align:left;background:none}
+.palettes .sw{display:flex;height:70px}
+.palettes .sw i{flex:1}
+.palettes span{display:block;padding:8px 2px 0;font-size:.85em}
+.credits{margin:70px 0 40px;padding-top:22px;border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+.credits div span{display:block;color:var(--muted);margin-bottom:4px}
+footer{max-width:1120px;margin:0 auto;padding:24px 20px 50px;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+@media (max-width:560px){.stage{border-radius:0;padding:18px 12px}.floor{min-height:560px}.palettes{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="house" viewBox="0 0 1168 1009"><path d="M1110.0 1004.1C1103.7 1002.7 1095.3 998.0 1091.2 993.6C1083.7 985.4 1080.9 977.3 1079.5 959.5C1079.1 955.1 1078.7 949.9 1078.5 948.0C1075.9 925.4 1075.5 916.9 1075.5 890.0C1075.6 872.9 1076.1 854.7 1076.8 848.5C1077.4 842.5 1078.3 834.1 1078.6 830.0C1079.2 822.6 1081.9 798.9 1084.0 783.5C1087.1 760.6 1087.7 753.0 1087.9 736.5C1088.0 726.6 1087.6 714.0 1087.0 708.5C1086.5 703.0 1085.8 696.0 1085.5 693.0C1085.0 687.4 1083.5 661.8 1082.5 641.0C1081.5 620.6 1080.0 598.0 1078.1 575.5C1074.6 533.1 1075.6 519.2 1083.8 494.5C1089.5 477.5 1089.4 477.8 1086.2 474.4C1079.4 467.0 1070.6 460.4 1040.5 440.2C1031.2 433.9 1018.5 425.0 1012.5 420.5C1006.5 416.1 993.9 407.3 984.5 401.0C966.8 389.2 943.9 373.1 943.0 371.9C942.7 371.5 940.0 369.2 936.9 366.8C932.3 363.3 925.1 357.1 915.6 348.5C905.7 339.6 902.4 336.6 896.0 330.6C878.0 313.6 860.2 299.4 831.7 279.5C815.6 268.2 787.7 248.0 787.0 247.1C786.7 246.8 783.4 243.9 779.5 240.8C775.6 237.7 771.4 234.1 770.0 232.8C768.6 231.6 764.4 227.6 760.5 224.1C756.6 220.5 748.5 212.9 742.4 207.1C736.3 201.3 728.7 194.0 725.4 191.0C714.4 180.7 693.7 165.0 659.6 141.0C638.2 126.0 630.9 120.3 613.5 105.0C596.6 90.1 588.5 83.6 584.5 81.8C581.9 80.7 581.6 80.9 575.1 87.6C571.4 91.4 564.3 99.2 559.3 105.0C551.0 114.6 537.4 128.3 530.9 133.6C524.5 138.8 503.6 151.8 488.5 160.0C484.1 162.4 478.8 165.4 476.8 166.7C474.7 167.9 472.8 169.0 472.4 169.0C471.1 169.0 459.2 176.6 451.5 182.4C443.8 188.1 436.8 194.9 408.5 224.0C389.8 243.2 376.6 253.8 328.3 288.7C321.6 293.5 310.7 301.8 304.0 307.0C297.3 312.2 288.3 319.2 284.0 322.5C261.4 340.0 248.3 350.4 237.5 359.3C226.0 368.9 221.1 373.4 191.5 402.0C158.0 434.3 146.2 442.4 109.5 458.0C89.8 466.4 81.8 470.3 80.2 472.2C78.9 473.9 80.4 484.4 85.2 506.1C88.1 519.2 88.3 522.1 88.3 538.0C88.3 549.0 87.7 559.6 86.7 566.5C83.3 589.5 83.0 597.6 82.8 673.0C82.5 751.3 82.5 750.5 86.5 780.5C89.8 804.6 91.0 817.3 91.7 835.0C93.1 868.7 92.4 909.6 90.0 932.0C89.5 936.7 88.6 946.6 88.0 954.0C86.5 973.6 83.5 981.7 74.9 989.4C67.4 996.2 61.0 998.5 49.5 998.5C37.5 998.5 30.9 995.8 23.2 988.1C12.6 977.4 11.0 970.1 13.4 942.3C14.3 930.9 15.6 916.1 16.1 909.5C18.4 883.2 16.7 824.0 13.0 798.5C7.8 762.4 7.6 758.7 7.7 693.5C7.8 596.2 8.0 589.9 10.6 568.5C14.2 539.3 14.1 533.2 9.2 509.5C4.5 486.3 3.4 474.1 5.0 461.7C7.7 439.9 18.7 422.4 38.0 409.4C43.7 405.5 64.0 395.5 75.0 391.1C105.6 378.9 111.5 374.7 149.9 337.4C186.6 301.9 222.7 272.9 311.0 208.1C335.6 190.0 341.3 185.0 371.0 155.0C403.1 122.7 411.7 116.2 454.0 92.8C484.1 76.1 485.9 74.7 508.8 48.8C518.3 37.9 526.5 29.0 526.8 29.0C527.2 29.0 529.8 26.9 532.5 24.3C547.4 10.4 566.8 3.1 585.5 4.3C604.9 5.5 623.2 14.4 646.9 34.3C652.2 38.7 656.7 42.6 657.0 43.0C657.3 43.4 661.3 47.0 666.0 51.0C670.7 55.1 674.7 58.7 675.0 59.0C676.2 60.4 688.8 69.7 699.2 76.9C746.4 109.4 762.6 122.3 797.4 155.4C824.7 181.4 837.5 191.7 869.6 214.0C880.2 221.4 920.0 250.7 921.0 251.9C921.3 252.3 924.9 255.4 929.0 258.9C933.1 262.4 942.4 270.8 949.5 277.5C982.0 308.0 991.4 315.3 1037.5 346.0C1045.2 351.1 1055.8 358.5 1061.0 362.5C1066.2 366.4 1074.1 372.0 1078.5 375.0C1086.8 380.6 1097.9 388.2 1109.0 395.9C1134.0 413.2 1152.9 433.6 1159.0 449.8C1166.7 470.3 1165.6 488.4 1154.4 520.8C1152.1 527.6 1151.9 529.3 1152.1 545.3C1152.2 554.8 1152.8 567.9 1153.5 574.5C1154.2 581.1 1155.3 595.3 1155.9 606.0C1156.5 616.7 1157.2 628.0 1157.5 631.0C1157.7 634.0 1158.2 644.1 1158.5 653.5C1158.9 662.9 1159.5 675.5 1160.1 681.5C1160.6 687.5 1161.5 698.6 1162.1 706.0C1163.9 727.6 1162.7 761.0 1159.1 789.5C1157.4 802.7 1155.8 815.5 1155.5 818.0C1155.2 820.5 1154.6 826.5 1154.1 831.5C1150.1 868.1 1149.3 898.0 1151.6 921.5C1151.8 924.2 1152.5 931.2 1153.1 937.0C1156.3 969.7 1156.2 974.3 1151.9 983.5C1144.8 998.5 1126.2 1007.7 1110.0 1004.1ZM409.5 829.1C389.0 823.0 374.8 808.7 345.5 764.5C331.1 742.7 318.2 727.0 314.8 727.0C312.8 727.0 303.0 738.1 295.8 748.5C278.6 773.2 278.9 772.8 272.6 776.0C252.6 786.1 230.4 768.2 235.9 746.4C237.2 741.5 251.0 720.1 261.5 707.0C282.0 681.3 305.0 670.7 327.5 676.5C347.8 681.8 362.3 695.8 389.0 736.0C403.5 757.8 410.9 767.7 417.8 774.4L422.9 779.3L426.4 776.6C431.6 772.6 438.9 763.1 455.1 739.0C472.7 712.9 478.1 705.8 488.1 695.8C501.9 682.1 513.3 676.2 527.9 675.3C549.3 673.9 567.8 684.8 587.0 710.0C592.4 717.1 596.5 723.1 616.1 751.9C624.1 763.8 637.1 779.0 639.3 779.0C642.2 779.0 655.1 763.1 669.1 742.3C688.1 713.9 694.3 705.7 704.0 696.0C720.0 680.0 733.2 674.2 751.0 675.2C775.7 676.7 791.7 691.0 826.5 743.3C838.9 762.0 847.3 772.6 852.8 776.8L856.1 779.3L862.8 772.4C866.5 768.6 873.8 759.2 878.9 751.5C889.7 735.3 892.0 732.6 897.5 729.7C903.2 726.6 915.8 726.6 921.6 729.7C933.3 735.9 938.8 751.0 933.7 762.8C929.8 771.7 908.9 800.0 898.7 810.3C877.1 831.9 853.8 836.6 830.3 824.3C816.2 816.8 803.1 802.2 781.5 769.8C759.9 737.4 750.1 725.8 746.1 727.9C741.6 730.4 730.7 744.1 715.8 766.4C707.0 779.5 696.8 793.9 693.3 798.2C676.1 819.6 660.1 829.7 642.2 830.8C622.4 831.9 603.6 821.5 586.5 799.7C584.9 797.6 582.5 794.7 581.4 793.2C580.2 791.7 573.0 781.3 565.5 770.0C546.6 742.0 537.7 730.5 532.6 727.8C529.2 725.9 519.4 737.2 501.7 763.5C471.5 808.5 457.4 822.7 436.8 829.1C429.2 831.5 417.6 831.5 409.5 829.1ZM416.5 680.0C401.1 677.9 387.4 669.1 372.4 651.5C366.6 644.7 356.2 630.1 344.6 612.5C330.9 591.7 318.6 577.0 314.9 577.0C312.1 577.0 301.1 589.8 291.5 604.1C286.6 611.5 280.9 619.0 279.0 620.9C263.6 635.9 237.0 625.9 235.2 604.4C234.6 597.0 236.6 591.9 245.1 579.3C266.9 546.8 279.9 534.1 299.0 526.7C307.5 523.3 324.1 523.7 333.0 527.4C351.8 535.2 364.9 548.9 390.5 587.5C405.9 610.8 419.9 628.0 423.6 628.0C425.0 628.0 437.5 614.5 441.6 608.5C443.1 606.3 450.3 595.6 457.7 584.6C477.6 555.1 485.6 545.5 498.5 535.9C518.8 520.8 541.2 520.3 562.1 534.3C575.3 543.2 586.0 556.2 609.4 591.5C622.7 611.5 636.3 628.0 639.6 628.0C642.6 628.0 655.7 611.6 670.8 589.2C679.7 575.9 687.8 564.0 688.8 562.8C712.9 533.0 725.9 524.5 747.5 524.5C758.6 524.5 764.7 526.1 773.5 531.3C788.8 540.3 799.8 552.9 825.3 590.9C839.4 611.9 852.5 628.0 855.5 628.0C857.9 628.0 870.6 613.2 879.7 599.9C890.6 583.8 893.6 580.7 900.9 577.9C916.6 572.0 933.3 582.8 935.6 600.2C936.7 608.6 932.0 617.4 912.4 643.6C885.3 679.8 857.3 689.2 827.5 672.1C821.2 668.5 804.5 652.5 799.5 645.2C797.8 642.9 791.4 633.5 785.1 624.2C763.6 592.7 756.8 583.7 750.6 578.8L747.2 576.1L741.7 581.3C735.4 587.3 730.4 594.0 712.6 620.4C689.7 654.5 678.4 666.6 662.5 674.4C643.2 684.0 623.6 681.9 606.0 668.5C593.4 658.8 585.9 649.6 562.5 615.0C550.2 596.7 542.6 586.9 536.1 580.5L531.0 575.5L524.2 582.5C520.4 586.5 510.6 599.7 501.6 613.0C478.1 647.6 470.1 657.6 457.5 667.9C451.9 672.4 438.5 678.7 432.5 679.5C429.8 679.8 426.4 680.3 425.0 680.4C423.6 680.6 419.8 680.4 416.5 680.0Z" fill-rule="evenodd" fill="currentColor"/></symbol></svg>
+
+<header class="top">
+  <a class="brand" href="#top"><svg><use href="#house"/></svg>Casa Mar</a>
+  <span class="lab">Journal de design</span>
+</header>
+
+<main id="top">
+<div class="wrap hero">
+  <div class="meta lab"><span>20 nov. 2026</span><span>Interaction &amp; motion</span><span>Lecture 4 min</span></div>
+  <h1>Casa Mar : le billet <em>en rouleau</em></h1>
+  <p class="dek">Une imprimante à tickets, un rouleau de papier thermique, un geste pour détacher sa place. L'interaction de la billetterie Casa Mar, en détail.</p>
+  <div class="tags lab"><span>Billetterie</span><span>Microinteraction</span><span>Physique</span><span>Identité</span></div>
+</div>
+
+<article class="wrap">
+  <p>Casa Mar, c'est une maison, la mer et la nuit, au Clos de Provence à Nîmes, en juin 2028. La promesse tient en quatre mots : <strong>fais comme chez toi</strong>. On voulait que l'achat d'un billet ressemble à ça. Pas un PDF de plus dans un mail, mais le petit ticket qu'on vous tend au comptoir d'une buvette de plage, encore tiède de l'imprimante.</p>
+  <p>D'où cette interaction : le billet s'imprime ligne par ligne, sort du rouleau, et c'est à toi de le tirer pour le détacher. Essaie juste en dessous.</p>
+</article>
+
+<section class="stage" aria-labelledby="demo-h">
+  <div class="stage-head">
+    <div>
+      <h2 id="demo-h" class="lab" style="margin:0 0 10px">Démo · Choisis ton billet</h2>
+      <div class="pills" role="group" aria-label="Type de billet">
+        <button class="pill" data-tier="0" aria-pressed="true">Early · 22€</button>
+        <button class="pill" data-tier="1" aria-pressed="false">Plein tarif · 30€</button>
+        <button class="pill" data-tier="2" aria-pressed="false">VIP · 60€</button>
+      </div>
+    </div>
+    <div class="dots" role="group" aria-label="Charte graphique">
+      <button data-set="1" aria-pressed="true" title="Charte orange et bleu" style="--c1:#E8B04A;--c2:#7BB1DD"><span class="lab" style="position:absolute;width:1px;height:1px;overflow:hidden">Orange et bleu</span></button>
+      <button data-set="2" aria-pressed="false" title="Charte rouge et rose" style="--c1:#D9203D;--c2:#F4A195"><span class="lab" style="position:absolute;width:1px;height:1px;overflow:hidden">Rouge et rose</span></button>
+      <button data-set="3" aria-pressed="false" title="Charte pêche et citron" style="--c1:#E4A479;--c2:#E9F188"><span class="lab" style="position:absolute;width:1px;height:1px;overflow:hidden">Pêche et citron</span></button>
+    </div>
+  </div>
+  <div class="floor" id="floor">
+    <div class="printer" id="printer"><div class="face"><svg><use href="#house"/></svg><b>Casa Mar</b><i class="led"></i></div></div>
+    <div class="slot"></div>
+    <div class="head" aria-hidden="true"></div>
+    <div class="strip" id="strip" aria-hidden="true"><div class="window" id="win"><div class="roll" id="roll"><div class="blank"></div></div></div></div>
+    <p class="hint" id="hint">Imprime un billet, puis tire le papier vers le bas pour le détacher</p>
+    <p class="hint" style="top:auto;bottom:160px;opacity:.55">Tire le billet vers le bas pour le détacher</p>
+    <div class="table"></div>
+  </div>
+  <div class="stage-foot">
+    <div class="act">
+      <button class="big" id="print">Imprimer</button>
+      <button class="big ghost" id="tear">Détacher</button>
+      <button class="big ghost" id="sound" aria-pressed="false">Son : non</button>
+    </div>
+    <span class="count" id="count" role="status" aria-live="polite">0 billet imprimé</span>
+  </div>
+</section>
+
+<article class="wrap">
+  <h2><small>01</small>Pourquoi un rouleau</h2>
+  <p>La billetterie est le premier objet de l'événement que les gens tiennent en main. Avant le son, avant la mer. On a cherché le support le plus « maison » possible et on est tombés sur le ticket thermique : modeste, chaleureux, un peu de travers. Il dit exactement ce que dit la marque.</p>
+  <p>Le billet reprend la maquette de la charte : event, date, location, tarif, numéro de commande, code d'entrée et la signature <strong>CASA MAR</strong> en Kokoschka. Chaque impression génère un nouveau numéro, comme un vrai rouleau.</p>
+  <p class="pull">Le billet n'est pas téléchargé. Il est imprimé, puis arraché.</p>
+
+  <h2><small>02</small>Tirer, déchirer</h2>
+  <p>Trois règles simples, que l'on sent dans la main sans avoir à les lire :</p>
+  <ul>
+    <li><strong>Le papier résiste.</strong> Quand tu tires, il ne suit qu'à 35 % de ton geste, comme un vrai rouleau retenu par l'imprimante. Il se balance au bout du doigt selon la direction du mouvement.</li>
+    <li><strong>Il cède au bon moment.</strong> Au-delà de 140 px de geste, ou avec un geste vif (plus de 0,9 px/ms), la perforation lâche. Sinon, le papier revient en place avec un petit rebond.</li>
+    <li><strong>Il tombe vraiment.</strong> Le morceau garde la vitesse de ton geste, tourne, chute et se pose sur la table. Les billets s'empilent, tu peux les rattraper et les déplacer.</li>
+  </ul>
+  <p>Le bord déchiré est un vrai bord en dents de scie, sur le billet comme sur le papier qui reste dans la machine. Tout fonctionne aussi au clavier : <em>Imprimer</em> puis <em>Détacher</em>.</p>
+
+  <h2><small>03</small>Le motion, en chiffres</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Moment</th><th>Valeur</th><th>Ce que ça donne</th></tr></thead>
+    <tbody>
+      <tr><td>Impression</td><td><code>12 px / 42 ms</code></td><td>Avance par crans, comme une tête thermique. Un billet sort en 1,5 s environ.</td></tr>
+      <tr><td>Micro-saccade</td><td><code>±0,6°</code> par cran</td><td>Le papier tremble un peu pendant l'impression.</td></tr>
+      <tr><td>Traction</td><td><code>× 0,35</code>, max <code>140 px</code></td><td>Résistance du rouleau.</td></tr>
+      <tr><td>Balancement</td><td>ressort <code>k = 0,08</code>, amorti <code>0,86</code></td><td>Le papier oscille puis se stabilise.</td></tr>
+      <tr><td>Retour</td><td><code>cubic-bezier(.2, 1.5, .4, 1)</code>, 420 ms</td><td>Petit rebond si on lâche trop tôt.</td></tr>
+      <tr><td>Déchirure</td><td>seuil <code>140 px</code> de geste ou <code>0,9 px/ms</code></td><td>Lâche net, avec un son de papier.</td></tr>
+      <tr><td>Chute</td><td>gravité <code>0,0028 px/ms²</code></td><td>Le billet garde la vitesse du geste et tourne en tombant.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="curves">
+    <div class="curve" style="--anim:c1"><h4>Avance d'impression</h4>
+      <svg viewBox="0 0 200 110" aria-label="Courbe en escalier"><path d="M10 100 H40 V82 H70 V64 H100 V46 H130 V28 H160 V10 H190" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+      <div class="dotline"><i style="animation-timing-function:steps(6,end)"></i></div><p>Des crans réguliers : <code>steps(6)</code>.</p></div>
+    <div class="curve" style="--anim:c2"><h4>Retour du papier</h4>
+      <svg viewBox="0 0 200 110" aria-label="Courbe avec rebond"><path d="M10 100 C50 -60 80 10 190 10" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+      <div class="dotline"><i style="animation-timing-function:cubic-bezier(.2,1.5,.4,1)"></i></div><p>Un dépassement léger, puis le calme.</p></div>
+    <div class="curve" style="--anim:c3"><h4>Chute du billet</h4>
+      <svg viewBox="0 0 200 110" aria-label="Courbe accélérée"><path d="M10 100 C120 100 160 70 190 10" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+      <div class="dotline"><i style="animation-timing-function:cubic-bezier(.55,0,1,.45)"></i></div><p>Accélération continue : la gravité.</p></div>
+  </div>
+
+  <h2><small>04</small>Trois chartes, un même papier</h2>
+  <p>Casa Mar existe en trois identités. Le papier reste crème, l'encre et l'imprimante changent. Clique sur une palette : la démo se met à jour.</p>
+  <div class="palettes">
+    <button data-set="1"><div class="sw"><i style="background:#0B0F1E"></i><i style="background:#E8B04A"></i><i style="background:#FFFEF1"></i><i style="background:#7BB1DD"></i></div><span>Orange et bleu</span></button>
+    <button data-set="2"><div class="sw"><i style="background:#0D0D11"></i><i style="background:#D9203D"></i><i style="background:#FFFEF1"></i><i style="background:#F4A195"></i></div><span>Rouge et rose</span></button>
+    <button data-set="3"><div class="sw"><i style="background:#280D19"></i><i style="background:#E4A479"></i><i style="background:#FFFEEB"></i><i style="background:#E9F188"></i></div><span>Pêche et citron</span></button>
+  </div>
+
+  <h2><small>05</small>Les petits détails</h2>
+  <ul>
+    <li><strong>Le son.</strong> Un cliquetis par cran pendant l'impression, un froissement court à la déchirure. Coupé par défaut, activable d'un clic.</li>
+    <li><strong>La tête thermique.</strong> Un filet de lumière dans la couleur secondaire s'allume sous la fente pendant l'impression, et la diode de la machine passe au blanc.</li>
+    <li><strong>Le code d'entrée.</strong> Chaque billet porte un motif unique, dérivé de son numéro de commande.</li>
+    <li><strong>Le calme.</strong> Avec « réduire les animations » activé, le billet sort et se détache sans balancement ni chute.</li>
+  </ul>
+
+  <div class="credits">
+    <div><span class="lab">Projet</span>Casa Mar, première édition</div>
+    <div><span class="lab">Identité</span>Kokoschka, Stolzl, trois palettes</div>
+    <div><span class="lab">Techno</span>HTML, CSS, JavaScript, Web Audio</div>
+    <div><span class="lab">Infos</span>Juin 2028 · Clos de Provence, Nîmes · 18+</div>
+  </div>
+</article>
+</main>
+<footer><span>Casa Mar · Fais comme chez toi</span><span>Billets : Early 22€ avant 14h · Plein tarif 30€ · VIP 60€</span></footer>
+
+<script>
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const root = document.documentElement;
+const TIERS = [['Early', '22€', 'avant 14h'], ['Plein tarif', '30€', 'toute la journée'], ['VIP', '60€', 'accès VIP']];
+const TH = 430;                     // hauteur d'un billet
+const STUB = 46;                    // papier qui dépasse au repos
+let tier = 0, fed = STUB, printed = 0, total = 0, busy = false;
+const win = $('#win'), roll = $('#roll'), strip = $('#strip'), floor = $('#floor'), printer = $('#printer');
+
+/* ---------- son (Web Audio, seulement après un clic) ---------- */
+let ac = null, soundOn = false;
+function tick(f = 1800, d = .018, g = .05) {
+  if (!soundOn || !ac) return;
+  const n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * d, ac.sampleRate), ch = b.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length);
+  n.buffer = b; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 1.4;
+  const gn = ac.createGain(); gn.gain.value = g; n.connect(bp).connect(gn).connect(ac.destination); n.start();
+}
+$('#sound').onclick = e => {
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); soundOn = !soundOn; } catch { soundOn = false; }
+  e.currentTarget.setAttribute('aria-pressed', soundOn); e.currentTarget.textContent = 'Son : ' + (soundOn ? 'oui' : 'non');
+};
+
+/* ---------- le billet ---------- */
+function qr(seed) {
+  let s = seed % 2147483647; const r = () => (s = s * 16807 % 2147483647) / 2147483647;
+  let h = '';
+  for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) {
+    const fin = (x < 3 && y < 3) || (x > 7 && y < 3) || (x < 3 && y > 7);
+    const ring = fin && !((x === 1 || x === 9) && (y === 1 || y === 9));
+    h += `<i class="${fin ? (ring ? '' : 'o') : (r() > .5 ? '' : 'o')}"></i>`;
+  }
+  return h;
+}
+function ticketHTML(n) {
+  const [name, price, sub] = TIERS[tier];
+  const num = String(3242562782 + n * 7919 + Math.floor(Math.random() * 97));
+  return `<div class="ticket">
+    <div class="brandline"><b>Casa Mar</b><svg><use href="#house"/></svg></div>
+    <div class="grid">
+      <div class="row"><div><div class="k">event</div><div class="v">Casa Mar</div></div><div style="text-align:right"><div class="k">date</div><div class="v">Juin 2028</div></div></div>
+      <div class="row"><div><div class="k">location</div><div class="v">Clos de Provence</div></div><div style="text-align:right"><div class="k">ville</div><div class="v">Nimes</div></div></div>
+    </div>
+    <div class="price"><b>${price}</b><span class="tier">${name} · ${sub}</span></div>
+    <div class="bottom"><div class="num">n° commande<span>${num}</span><div class="foot">Réservé aux majeurs · 12h → 01h</div></div><div class="qr">${qr(+num)}</div></div>
+    <span class="cut">✂</span>
+  </div>`;
+}
+
+/* ---------- impression ---------- */
+function hint(on) { $('#hint').style.opacity = on ? .7 : 0; }
+function setFed(v) { fed = v; win.style.setProperty('--fed', v + 'px'); }
+function updateCount() { $('#count').textContent = `${total} billet${total > 1 ? 's' : ''} imprimé${total > 1 ? 's' : ''}`; }
+function print() {
+  if (busy) return;
+  busy = true; printer.classList.add('busy'); hint(false);
+  roll.insertAdjacentHTML('beforeend', ticketHTML(total));    // column-reverse : le nouveau billet est au-dessus, encore dans la machine
+  // le blanc de départ reste tout en haut du rouleau
+  roll.appendChild(roll.querySelector('.blank'));
+  total++; printed++; updateCount();
+  const target = fed + TH;
+  if (reduce) { setFed(target); done(); return; }
+  const step = () => {
+    if (fed >= target) { done(); return; }
+    setFed(Math.min(target, fed + 12));
+    kick(.6 * (Math.random() * 2 - 1)); tick(1500 + Math.random() * 900);
+    setTimeout(step, 42);
+  };
+  step();
+  function done() { busy = false; printer.classList.remove('busy'); }
+}
+$('#print').onclick = print;
+printer.addEventListener('click', print);
+
+/* ---------- balancement (ressort) ---------- */
+let ang = 0, angV = 0, angTarget = 0, pull = 0;
+function kick(v) { angV += v * .02; }
+function loop() {
+  angV += (angTarget - ang) * .08; angV *= .86; ang += angV;
+  strip.style.transform = `translateY(${pull}px) rotate(${ang}deg)`;
+  requestAnimationFrame(loop);
+}
+if (!reduce) loop();
+
+/* ---------- tirer / déchirer ---------- */
+let drag = null;
+strip.addEventListener('pointerdown', e => {
+  if (busy) return;
+  drag = { x: e.clientX, y: e.clientY, t: performance.now(), vy: 0, vx: 0, lx: e.clientX, ly: e.clientY, lt: performance.now() };
+  strip.setPointerCapture(e.pointerId);
+});
+strip.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const now = performance.now(), dt = Math.max(1, now - drag.lt);
+  drag.vy = (e.clientY - drag.ly) / dt; drag.vx = (e.clientX - drag.lx) / dt; drag.lx = e.clientX; drag.ly = e.clientY; drag.lt = now;
+  const dy = Math.max(0, e.clientY - drag.y);
+  pull = Math.min(140, dy * .35);
+  angTarget = Math.max(-14, Math.min(14, (e.clientX - drag.x) * .06));
+  strip.style.transform = `translateY(${pull}px) rotate(${ang}deg)`;
+  if (printed > 0 && (dy > 140 || drag.vy > .9)) { tear(drag.vx, drag.vy); drag = null; }
+});
+const release = () => {
+  if (!drag) return; drag = null; angTarget = 0;
+  strip.style.transition = 'transform .42s cubic-bezier(.2,1.5,.4,1)'; pull = 0;
+  setTimeout(() => strip.style.transition = '', 450);
+};
+strip.addEventListener('pointerup', release); strip.addEventListener('pointercancel', release);
+$('#tear').onclick = () => { if (!busy && printed > 0) tear(0, .5); };
+
+function tear(vx, vy) {
+  const tickets = [...roll.querySelectorAll('.ticket')];       // tous les billets imprimés partent ensemble
+  if (!tickets.length) return;
+  const fr = floor.getBoundingClientRect();
+  const r0 = tickets[0].getBoundingClientRect();               // le plus ancien, en bas
+  const rN = tickets[tickets.length - 1].getBoundingClientRect();
+  const piece = document.createElement('div'); piece.className = 'piece';
+  piece.style.display = 'flex'; piece.style.flexDirection = 'column';
+  [...tickets].reverse().forEach(t => piece.appendChild(t));
+  floor.appendChild(piece);
+  const x = rN.left - fr.left, y = rN.top - fr.top;
+  setFed(STUB); printed = 0; pull = 0; setTimeout(() => hint(true), 600); angTarget = 0; strip.style.transition = '';
+  win.classList.add('torn');
+  tick(900, .12, .14); tick(2600, .06, .08);
+  fall(piece, x, y, vx, vy);
+  // les anciens billets s'effacent quand il y en a trop
+  const all = $$('.piece'); if (all.length > 5) { all[0].classList.add('old'); setTimeout(() => all[0].remove(), 900); }
+}
+
+function fall(el, x, y, vx, vy) {
+  const fr = floor.getBoundingClientRect();
+  const rest = fr.height - 70 - el.offsetHeight * .5 + (Math.random() * 30);
+  let rot = ang, vr = (vx * 6) + (Math.random() - .5) * 4, px = x, py = y;
+  let vX = vx * .6 + (Math.random() - .5) * .3, vY = Math.max(.1, vy * .5);
+  const restRot = (Math.random() - .5) * 24, sc = .62;
+  let last = performance.now();
+  el.style.transformOrigin = '50% 0';
+  if (reduce) { el.style.transform = `translate(${px}px, ${rest}px) scale(${sc}) rotate(${restRot}deg)`; grab(el); return; }
+  const step = now => {
+    const dt = Math.min(32, now - last); last = now;
+    vY += .0028 * dt; px += vX * dt; py += vY * dt; rot += vr * dt * .02;
+    const k = Math.min(1, Math.max(0, (py - y) / (rest - y)));
+    const s = 1 - (1 - sc) * k;
+    px = Math.max(-40, Math.min(fr.width - 300 * s + 40, px));
+    if (py >= rest) {
+      py = rest;
+      el.style.transition = 'transform .5s cubic-bezier(.2,1.5,.4,1)';
+      el.style.transform = `translate(${px}px, ${py}px) scale(${sc}) rotate(${restRot}deg)`;
+      setTimeout(() => el.style.transition = '', 520); el._p = { px, py, rot: restRot, sc }; grab(el); return;
+    }
+    el.style.transform = `translate(${px}px, ${py}px) scale(${s}) rotate(${rot}deg)`;
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function grab(el) {                                             // les billets posés se déplacent à la main
+  el._p = el._p || { px: 0, py: 0, rot: 0, sc: .62 };
+  let d = null;
+  el.addEventListener('pointerdown', e => { d = { x: e.clientX - el._p.px, y: e.clientY - el._p.py }; el.setPointerCapture(e.pointerId); floor.appendChild(el); e.stopPropagation(); });
+  el.addEventListener('pointermove', e => { if (!d) return; el._p.px = e.clientX - d.x; el._p.py = e.clientY - d.y;
+    el.style.transform = `translate(${el._p.px}px, ${el._p.py}px) scale(${el._p.sc}) rotate(${el._p.rot}deg)`; });
+  el.addEventListener('pointerup', () => d = null);
+}
+
+/* ---------- tarif et charte ---------- */
+$$('.pill').forEach(b => b.onclick = () => { tier = +b.dataset.tier; $$('.pill').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+$$('[data-set]').forEach(b => b.addEventListener('click', () => {
+  root.dataset.id = b.dataset.set;
+  $$('.dots button').forEach(x => x.setAttribute('aria-pressed', x.dataset.set === b.dataset.set));
+}));
+
+/* état de départ : un billet déjà imprimé, pour que la démo soit lisible au premier regard */
+roll.insertAdjacentHTML('beforeend', ticketHTML(0)); roll.appendChild(roll.querySelector('.blank'));
+total = 1; printed = 1; setFed(STUB + TH); updateCount(); hint(false);
+})();
+</script>
+</body>
+</html>
