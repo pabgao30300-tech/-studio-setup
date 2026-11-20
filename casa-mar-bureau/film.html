@@ -1,0 +1,41 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>film</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+import { createOffice } from './office.js';
+const q = new URLSearchParams(location.search);
+const w = +(q.get('w') || 1080), h = +(q.get('h') || 1920);
+const c = document.getElementById('c'); c.style.width = w + 'px'; c.style.height = h + 'px';
+try { const f = new FontFace('Kokoschka', 'url(assets/fonts/Kokoschka-casa.woff2)'); await f.load(); document.fonts.add(f); } catch (e) {}
+const o = await createOffice(c, { quality: 'live', width: w, height: h });
+o.setView('entree');                                         // caméra perspective
+o.prepareBuild();
+o.renderer.setPixelRatio(1);
+const S = {                                                   // calendrier de construction (secondes)
+  floor:   { start: .2,  dur: 1.0, each: 1.0, type: 'grow' },
+  walls:   { start: 1.4, dur: 2.2, each: .9,  type: 'rise' },
+  glass:   { start: 3.2, dur: 2.2, each: .8,  type: 'rise' },
+  house:   { start: 5.2, dur: 1.9, each: .55, type: 'drop' },
+  salon:   { start: 7.0, dur: 2.2, each: .7,  type: 'drop' },
+  cuisine: { start: 9.2, dur: 2.0, each: .6,  type: 'drop' },
+  open:    { start: 11.2, dur: 2.6, each: .6, type: 'drop' },
+  reunion: { start: 13.8, dur: 2.2, each: .6, type: 'drop' },
+  alcove:  { start: 16.0, dur: .9,  each: .5, type: 'drop' },
+  direction: { start: 16.9, dur: 1.8, each: .6, type: 'drop' },
+  lights:  { start: 18.6, dur: 1.4, each: .6, type: 'lower' },
+  garden:  { start: 19.0, dur: 1.0, each: .8, type: 'grow' },
+};
+const ease = k => k * k * (3 - 2 * k), cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+window.frame = (t) => {
+  o.setBuild(t, S);
+  const hour = t < 19.5 ? 16.2 : 16.2 + (20.9 - 16.2) * ease(cl((t - 19.5) / 3.5));
+  o.setTime(hour);
+  const cam = o.persp; cam.fov = 38; cam.aspect = w / h; cam.updateProjectionMatrix();
+  const k = ease(cl(t / 24)), a = -1.2 + .95 * k, r = 24.5 - 4 * k, y = 17.5 - 4.5 * k;
+  const tx = 5.6, tz = 4.0, ty = -.6 + .8 * k;
+  cam.position.set(tx + Math.sin(a) * r, y, tz + Math.cos(a) * r); cam.lookAt(tx, ty, tz);
+  o.render(); return c.toDataURL('image/jpeg', .93);
+};
+window.ready = true;
+</script></body></html>

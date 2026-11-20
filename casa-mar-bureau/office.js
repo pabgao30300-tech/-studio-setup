@@ -166,18 +166,21 @@ function makeMaterials() {
 }
 
 /* ---------------- primitives ---------------- */
-let G;                                                    // groupe courant
+let G, ROOT;                                              // groupe courant, groupe racine
+let PHASE = 'misc';                                       // étape de construction (pour le film)
 const PLAN = [];                                          // empreintes pour le plan 2D
 const SOLIDS = [];                                        // obstacles pour la visite (AABB 2D)
 function mesh(geo, mat, x = 0, y = 0, z = 0, parent = G) {
-  const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
+  const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m);
+  if (parent === ROOT) m.userData.phase = PHASE; return m;
 }
 function B(mat, x0, y0, z0, x1, y1, z1, parent = G) {    // boîte entre deux coins
   return mesh(new THREE.BoxGeometry(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0)), mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, parent);
 }
 function RB(mat, w, h, d, r, x, y, z, parent = G) { return mesh(new RoundedBoxGeometry(w, h, d, 3, r), mat, x, y, z, parent); }
 function cyl(mat, r, h, x, y, z, seg = 24, parent = G, r2 = r) { return mesh(new THREE.CylinderGeometry(r, r2, h, seg), mat, x, y, z, parent); }
-function group(x, z, ry = 0, y = 0) { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; G.add(g); return g; }
+function group(x, z, ry = 0, y = 0) { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; G.add(g); if (G === ROOT) g.userData.phase = PHASE; return g; }
+const withPhase = (ph, fn) => function (...a) { const prev = PHASE; PHASE = ph; try { return fn(...a); } finally { PHASE = prev; } };
 const fp = (o) => PLAN.push(o);
 const solid = (x0, z0, x1, z1) => SOLIDS.push([Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)]);
 
@@ -264,36 +267,37 @@ function books(x0, x1, y, z0, z1, axis = 'x') {           // une rangée de livr
     p += w + .002;
   }
 }
-function linearPendant(x0, x1, z, y = 2.25) {
+const linearPendant = withPhase('lights', function (x0, x1, z, y = 2.25) {
   const LEN = x1 - x0;
   const body = B(M.steel, x0, y, z - .04, x1, y + .06, z + .04);
   const strip = B(M.lightOn, x0 + .02, y - .006, z - .025, x1 - .02, y, z + .025); strip.castShadow = false;
   [x0 + .15, x1 - .15].forEach(cx => { const c = cyl(M.steel, .003, 3 - y - .06, cx, (3 + y + .06) / 2, z, 4); c.castShadow = false; });
   LIGHTS.push({ x: (x0 + x1) / 2, y: y - .1, z, i: 1.2 * LEN, d: 6 });
   return body;
-}
-function pendantZ(x, z0, z1, y = 2.25) {                  // même suspension, orientée nord-sud
+});
+const pendantZ = withPhase('lights', function (x, z0, z1, y = 2.25) {                  // même suspension, orientée nord-sud
   B(M.steel, x - .04, y, z0, x + .04, y + .06, z1);
   const s = B(M.lightOn, x - .025, y - .006, z0 + .02, x + .025, y, z1 - .02); s.castShadow = false;
   [z0 + .15, z1 - .15].forEach(cz => { const c = cyl(M.steel, .003, 3 - y - .06, x, (3 + y + .06) / 2, cz, 4); c.castShadow = false; });
   LIGHTS.push({ x, y: y - .1, z: (z0 + z1) / 2, i: 1.2 * (z1 - z0), d: 6 });
-}
-function globe(x, z, y, r = .2) {
+});
+const globe = withPhase('lights', function (x, z, y, r = .2) {
   const c = cyl(M.steel, .003, 3 - y - r, x, (3 + y + r) / 2, z, 4); c.castShadow = false;
   const s = mesh(new THREE.SphereGeometry(r, 28, 20), M.lightOn, x, y, z); s.castShadow = false;
   LIGHTS.push({ x, y: y - .05, z, i: 1.4, d: 5 });
-}
-function cone(x, z, y) {
+});
+const cone = withPhase('lights', function (x, z, y) {
   const c = cyl(M.steel, .003, 3 - y - .2, x, (3 + y + .2) / 2, z, 4); c.castShadow = false;
   const sh = mesh(new THREE.ConeGeometry(.17, .22, 32, 1, true), new THREE.MeshStandardMaterial({ color: C.orange, roughness: .35, metalness: .4, side: THREE.DoubleSide }), x, y + .08, z);
   const d = mesh(new THREE.CircleGeometry(.15, 24), M.lightOn, x, y - .02, z); d.rotation.x = Math.PI / 2; d.castShadow = false;
   LIGHTS.push({ x, y: y - .1, z, i: 1.1, d: 4 });
-}
+});
 const LIGHTS = [];
 
 /* ---------------- architecture ---------------- */
 const CUT = [];                                           // éléments coupés en vue isométrique
 function architecture() {
+  PHASE = 'floor';
   const { W, D, H } = LAYOUT;
   // dalle + sol béton ciré
   const floor = mesh(new THREE.PlaneGeometry(W, D), M.concrete, W / 2, 0, D / 2); floor.rotation.x = -Math.PI / 2; floor.castShadow = false;
@@ -303,15 +307,18 @@ function architecture() {
   // poutres béton apparentes
   [3.3, 6.7].forEach(x => { const b = B(M.ceiling, x - .15, H - .35, 0, x + .15, H, D); CEIL.push(b); });
 
+  PHASE = 'walls';
   // mur nord (rue) avec porte d'entrée
   B(M.plaster, -.2, 0, -.2, .6, H, 0); B(M.plaster, 1.6, 0, -.2, W + .2, H, 0); B(M.plaster, .6, 2.4, -.2, 1.6, H, 0);
   solid(-.2, -.2, .6, 0); solid(1.6, -.2, W + .2, 0);
+  PHASE = 'glass';
   // porte vitrée cadre acier
   frameRect(.6, 0, -.1, 1.6, 2.4, -.1, 'z');
   const door = B(M.glass, .62, .02, -.11, 1.58, 2.38, -.09); door.castShadow = false;
   B(M.brass, 1.42, .9, -.03, 1.45, 1.6, -.0);              // poignée bâton laiton
+  PHASE = 'walls';
   // mur ouest (mitoyen) : coupé en iso
-  const west = new THREE.Group(); G.add(west); CUT.push(west);
+  const west = new THREE.Group(); G.add(west); CUT.push(west); west.userData.phase = 'walls';
   B(M.plaster, -.2, 0, 0, 0, H, D, west); solid(-.2, 0, 0, D);
   // mur est avec deux grandes baies
   B(M.plaster, W, 0, -.2, W + .2, H, .5); B(M.plaster, W, 0, 3.3, W + .2, H, 5.0); B(M.plaster, W, 0, 7.5, W + .2, H, D + .2);
@@ -319,7 +326,7 @@ function architecture() {
   solid(W, -.2, W + .2, D + .2);
   glazing(W + .1, .5, 3.3, 'x', 3); glazing(W + .1, 5.0, 7.5, 'x', 3);
   // grande façade sud vitrée (coupée en iso)
-  const south = new THREE.Group(); G.add(south); CUT.push(south);
+  const south = new THREE.Group(); G.add(south); CUT.push(south); south.userData.phase = 'glass';
   const prev = G; G = south;
   B(M.plaster, -.2, 2.8, D, W + .2, H, D + .2);
   glazingSouth();
@@ -328,6 +335,7 @@ function architecture() {
   // cloisons vitrées réunion / direction
   partitionX(6.6, 0, 3.8, [2.85, 3.75]);
   partitionX(6.6, 4.8, 8, [4.9, 5.8]);
+  PHASE = 'walls';
   B(M.plaster, 6.6, 0, 3.8, W, H, 3.9); solid(6.6, 3.8, W, 3.9);
   B(M.plaster, 6.6, 0, 4.7, W, H, 4.8); solid(6.6, 4.7, W, 4.8);
   fp({ t: 'wall', x0: 6.6, z0: 3.8, x1: W, z1: 3.9 }); fp({ t: 'wall', x0: 6.6, z0: 4.7, x1: W, z1: 4.8 });
@@ -337,21 +345,21 @@ function frameRect(x0, y0, z, x1, y1, _z, axis) {          // cadre acier fin au
   const t = .04;
   if (axis === 'z') { B(M.steel, x0, y0, z - .03, x0 + t, y1, z + .03); B(M.steel, x1 - t, y0, z - .03, x1, y1, z + .03); B(M.steel, x0, y1 - t, z - .03, x1, y1, z + .03); }
 }
-function glazing(x, z0, z1, _a, h) {                       // baie est : vitrage + meneaux
+const glazing = withPhase('glass', function (x, z0, z1, _a, h) {                       // baie est : vitrage + meneaux
   const g = B(M.glass, x - .01, 0, z0, x + .01, 2.7, z1); g.castShadow = false; g.receiveShadow = false;
   const n = Math.max(1, Math.round((z1 - z0) / 1.3));
   for (let i = 0; i <= n; i++) { const z = z0 + (z1 - z0) * i / n; B(M.steel, x - .03, 0, z - .025, x + .03, 2.7, z + .025); }
   B(M.steel, x - .03, 0, z0, x + .03, .05, z1); B(M.steel, x - .03, 2.65, z0, x + .03, 2.7, z1);
-}
-function glazingSouth() {
+});
+const glazingSouth = withPhase('glass', function () {
   const { W, D } = LAYOUT, z = D + .08;
   const g = B(M.glass, 0, 0, z - .01, W, 2.8, z + .01); g.castShadow = false; g.receiveShadow = false;
   const n = 6;
   for (let i = 0; i <= n; i++) { const x = W * i / n; B(M.steel, x - .03, 0, z - .04, x + .03, 2.8, z + .04); }
   B(M.steel, 0, 2.2, z - .03, W, 2.24, z + .03);           // imposte
   B(M.steel, 0, 0, z - .04, W, .05, z + .04);
-}
-function partitionX(x, z0, z1, door) {                     // cloison vitrée toute hauteur, porte coulissante
+});
+const partitionX = withPhase('glass', function (x, z0, z1, door) {                     // cloison vitrée toute hauteur, porte coulissante
   const H = LAYOUT.H;
   const segs = [[z0, door[0]], [door[1], z1]];
   segs.forEach(([a, b]) => {
@@ -368,10 +376,11 @@ function partitionX(x, z0, z1, door) {                     // cloison vitrée to
   fp({ t: 'door', x, z0: door[0], z1: door[1] });
   // bande de vitrophanie (sécurité) aux couleurs de la marque
   const band = B(new THREE.MeshStandardMaterial({ color: C.orange, roughness: .5, transparent: true, opacity: .85 }), x + .021, 1.1, z0 + .02, x + .023, 1.16, door[0] - .02); band.castShadow = false;
-}
+});
 
 /* ---------------- les pièces ---------------- */
 async function entreeSalon() {
+  PHASE = 'house';
   // la « maison dans la maison » : portique en chêne au profil du logo
   const outer = [[0, 0], [0, 2.15], [1.6, 2.85], [3.2, 2.15], [3.2, 0]];
   const T = .12;
@@ -388,6 +397,7 @@ async function entreeSalon() {
   }
   fp({ t: 'house', x0: .1, z0: 1.85, x1: 3.3, z1: 4.37 });
 
+  PHASE = 'salon';
   // sofa contre le mur ouest, face à l'est
   sofa(.52, 3.1, 2.1, Math.PI / 2, M.boucle); fp({ t: 'rect', x0: .05, z0: 2.05, x1: 1.0, z1: 4.15, label: 'Canapé' });
   // tapis vagues
@@ -428,7 +438,7 @@ async function entreeSalon() {
     geo.computeBoundingBox(); const bb = geo.boundingBox, s = 1.15 / (bb.max.x - bb.min.x);
     geo.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, 0);
     const logo = new THREE.Mesh(geo, M.brass); logo.scale.set(s, -s, s); logo.rotation.y = Math.PI / 2;
-    logo.position.set(.02, 1.75, .75); logo.castShadow = true; G.add(logo);
+    logo.position.set(.02, 1.75, .75); logo.castShadow = true; logo.userData.phase = PHASE; G.add(logo);
   } catch (e) { /* logo facultatif */ }
   // lumière de mur rasante sous le logo
   const strip = B(M.lightOn, .02, 2.35, .2, .05, 2.37, 1.6); strip.castShadow = false;
@@ -561,12 +571,13 @@ function direction() {
 }
 
 function outside() {
+  PHASE = 'outside';
   const { W, D } = LAYOUT;
   const deck = mesh(new THREE.PlaneGeometry(W + 4, 3.2), M.deck, W / 2, -.02, D + 1.8); deck.rotation.x = -Math.PI / 2; deck.castShadow = false;
   const gr = mesh(new THREE.PlaneGeometry(200, 200), M.grass, W / 2, -.06, D + 60); gr.rotation.x = -Math.PI / 2; gr.castShadow = false;
   const street = mesh(new THREE.PlaneGeometry(200, 30), M.ground, W / 2, -.05, -15); street.rotation.x = -Math.PI / 2; street.castShadow = false;
   // jardinières + oliviers
-  const prevG = G; G = new THREE.Group(); G.name = 'garden'; prevG.add(G);
+  const prevG = G; G = new THREE.Group(); G.name = 'garden'; G.userData.phase = 'garden'; prevG.add(G);
   [[1.2, 9.8], [5, 9.9], [8.8, 9.8]].forEach(([x, z]) => {
     B(M.facade, x - .7, -.02, z - .3, x + .7, .5, z + .3);
     const t = group(x, z); cyl(M.oakDark, .06, 1.4, 0, 1.1, 0, 10, t);
@@ -598,9 +609,11 @@ export async function createOffice(canvas, { quality = 'live', width, height } =
   scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), .04).texture;
 
   makeTextures(); makeMaterials();
-  G = new THREE.Group(); scene.add(G);
+  G = ROOT = new THREE.Group(); scene.add(G);
   seed = 21;
-  architecture(); await entreeSalon(); kitchenette(); openSpace(); reunion(); alcove(); direction(); outside();
+  architecture(); await entreeSalon();
+  PHASE = 'cuisine'; kitchenette(); PHASE = 'open'; openSpace(); PHASE = 'reunion'; reunion();
+  PHASE = 'alcove'; alcove(); PHASE = 'direction'; direction(); outside();
   const upper = G.getObjectByName('upper'), garden = G.getObjectByName('garden');
 
   // lumière du jour
@@ -689,12 +702,49 @@ export async function createOffice(canvas, { quality = 'live', width, height } =
   }
   composer.addPass(new OutputPass());
 
+
+  // ---- film : construction progressive ----
+  let BUILD = null;
+  function prepareBuild() {
+    setCut(true);
+    BUILD = ROOT.children.filter(o => o.userData.phase).map(o => {
+      const b = new THREE.Box3().setFromObject(o);
+      return { o, ph: o.userData.phase, p0: o.position.clone(), s0: o.scale.clone(), bottom: isFinite(b.min.y) ? b.min.y : 0, hidden: !o.visible };
+    });
+    const count = {}; BUILD.forEach(it => { it.i = count[it.ph] = (count[it.ph] ?? -1) + 1; });
+    BUILD.forEach(it => it.n = count[it.ph] + 1);
+    return BUILD;
+  }
+  const easeOutBack = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const easeOut = k => 1 - Math.pow(1 - k, 3);
+  function setBuild(t, schedule) {
+    for (const it of BUILD) {
+      const sc = schedule[it.ph]; const o = it.o;
+      if (it.hidden) { o.visible = false; continue; }
+      if (!sc) { o.visible = true; continue; }
+      const st = sc.start + (sc.dur - sc.each) * (it.n > 1 ? it.i / (it.n - 1) : 0);
+      const k = THREE.MathUtils.clamp((t - st) / sc.each, 0, 1);
+      o.visible = k > 0;
+      o.position.copy(it.p0); o.scale.copy(it.s0);
+      if (k >= 1 || !o.visible) continue;
+      if (sc.type === 'rise') { const e = easeOut(k); o.scale.y = it.s0.y * Math.max(.001, e); o.position.y = it.p0.y + (it.bottom - it.p0.y) * (1 - e); }
+      else if (sc.type === 'grow') { const e = easeOutBack(k); o.scale.set(it.s0.x * Math.max(.001, e), it.s0.y * Math.max(.001, e), it.s0.z * Math.max(.001, e)); }
+      else if (sc.type === 'flat') { const e = easeOut(k); o.scale.x = it.s0.x * Math.max(.001, e); o.scale.z = it.s0.z * Math.max(.001, e); }
+      else if (sc.type === 'lower') { const e = easeOut(k); o.position.y = it.p0.y + 1.4 * (1 - e); }
+      else { // drop : tombe et rebondit légèrement
+        const e = k < .7 ? (k / .7) ** 2 : 1 - Math.sin((k - .7) / .3 * Math.PI) * .06;
+        o.position.y = it.p0.y + 3.2 * (1 - Math.min(1, e)) + (k >= .7 ? (1 - e) * 1.2 : 0);
+        const g = .7 + .3 * Math.min(1, k * 1.6); o.scale.set(it.s0.x * g, it.s0.y * g, it.s0.z * g);
+      }
+    }
+  }
+
   function resize(w, h) { renderer.setSize(w, h, false); composer.setSize(w, h); persp.aspect = w / h; persp.updateProjectionMatrix(); if (camera === ortho) fitOrtho(w / h); }
 
   return {
     THREE, renderer, scene, controls, VIEWS, SOLIDS, PLAN, LAYOUT,
     get camera() { return camera; }, persp,
-    setView, setTime, setCut, setOrbit, resize,
+    setView, setTime, setCut, setOrbit, resize, prepareBuild, setBuild,
     render() { passes.render.camera = camera; if (passes.ao) passes.ao.camera = camera; composer.render(); },
   };
 }
