@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fr" data-id="1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casa Mar · ASCII motions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : article crème, démos en panneaux sombres. Tout ce qui bouge est fait de caractères ;
+   la typo de la marque (Kokoschka, Stolzl) encadre, le mono travaille. */
+@font-face{font-family:"Kokoschka";src:url(assets/fonts/Kokoschka-casa.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Stolzl";font-weight:700;src:url(assets/fonts/Stolzl-Bold-casa.woff2) format("woff2");font-display:swap}
+:root{
+  --paper:#FFFEF1; --ink:#0B0F1E; --a:#E8B04A; --b:#7BB1DD; --stage:#0B0F1E; --muted:#5b5f6e; --rule:#0B0F1E22;
+  --display:"Kokoschka","Outfit",system-ui,sans-serif;
+  --label:"Stolzl","Outfit",system-ui,sans-serif;
+  --body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
+}
+[data-id="2"]{--ink:#0D0D11; --a:#D9203D; --b:#F4A195; --stage:#0D0D11; --rule:#0D0D1122}
+[data-id="3"]{--ink:#280D19; --a:#E4A479; --b:#E9F188; --stage:#280D19; --rule:#280D1922; --paper:#FFFEEB}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.2vw,19px);line-height:1.62;transition:background .4s}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+.lab{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem}
+.mono{font-family:var(--mono)}
+.top{max-width:1120px;margin:0 auto;padding:22px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--rule)}
+.top .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.3rem;color:var(--ink);text-decoration:none}
+.top .brand svg{width:30px;height:26px;color:var(--a)}
+.hero{padding:64px 0 30px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);margin-bottom:24px}
+.hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(2.6rem,7vw,4.8rem);line-height:.9;margin:0 0 22px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--a)}
+.hero .dek{font-size:1.25em;font-weight:300;margin:0;max-width:36ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tags span{border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px}
+article h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(1.8rem,3.4vw,2.4rem);line-height:.95;margin:60px 0 16px;display:flex;gap:14px;align-items:baseline}
+article h2 small{font-family:var(--label);font-weight:700;font-size:.8rem;letter-spacing:.12em;color:var(--a)}
+article p{margin:0 0 1.05em}
+article ul{padding-left:1.1em;margin:0 0 1.2em}
+article li{margin-bottom:.35em}
+code{font-family:var(--mono);font-size:.88em;background:color-mix(in srgb,var(--a) 20%,transparent);padding:1px 6px;border-radius:5px}
+.pull{font-family:var(--display);text-transform:uppercase;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1;margin:40px 0;padding-left:20px;border-left:5px solid var(--a)}
+table{width:100%;border-collapse:collapse;margin:10px 0 24px;font-variant-numeric:tabular-nums;font-size:.94em}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+
+/* panneaux de démo */
+.panel{background:var(--stage);color:var(--paper);border-radius:24px;overflow:hidden;margin:28px auto;transition:background .4s;position:relative}
+.panel.wide{max-width:1120px}
+.panel canvas{display:block;width:100%;cursor:crosshair}
+.panel .cap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid color-mix(in srgb,var(--paper) 14%,transparent);font-size:.82rem}
+.panel .cap span:last-child{opacity:.6}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:1120px;margin:28px auto;padding:0 20px}
+.grid2 .panel{margin:0}
+.controls{max-width:1120px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.controls label{display:flex;gap:10px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:7px 12px;font-family:var(--mono);font-size:.8rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.dots{display:flex;gap:8px}
+.dots button{width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);padding:0;background:conic-gradient(var(--c1) 0 50%,var(--c2) 0)}
+.dots button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+input[type=range]{accent-color:var(--a);width:140px}
+.copy{border:0;background:var(--a);color:var(--stage);border-radius:999px;padding:10px 16px;font-family:var(--label);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.ramp{font-family:var(--mono);font-size:1.4rem;letter-spacing:.4em;background:var(--stage);color:var(--a);padding:16px 20px;border-radius:14px;overflow-x:auto;white-space:nowrap;transition:background .4s}
+.credits{margin:70px 0 40px;padding-top:22px;border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+.credits div span{display:block;color:var(--muted);margin-bottom:4px}
+footer{max-width:1120px;margin:0 auto;padding:24px 20px 50px;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,150%);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:999px;transition:transform .4s cubic-bezier(.2,1.4,.4,1);z-index:9}
+.toast.on{transform:translate(-50%,0)}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="house" viewBox="0 0 1168 1009"><path d="M1110.0 1004.1C1103.7 1002.7 1095.3 998.0 1091.2 993.6C1083.7 985.4 1080.9 977.3 1079.5 959.5C1079.1 955.1 1078.7 949.9 1078.5 948.0C1075.9 925.4 1075.5 916.9 1075.5 890.0C1075.6 872.9 1076.1 854.7 1076.8 848.5C1077.4 842.5 1078.3 834.1 1078.6 830.0C1079.2 822.6 1081.9 798.9 1084.0 783.5C1087.1 760.6 1087.7 753.0 1087.9 736.5C1088.0 726.6 1087.6 714.0 1087.0 708.5C1086.5 703.0 1085.8 696.0 1085.5 693.0C1085.0 687.4 1083.5 661.8 1082.5 641.0C1081.5 620.6 1080.0 598.0 1078.1 575.5C1074.6 533.1 1075.6 519.2 1083.8 494.5C1089.5 477.5 1089.4 477.8 1086.2 474.4C1079.4 467.0 1070.6 460.4 1040.5 440.2C1031.2 433.9 1018.5 425.0 1012.5 420.5C1006.5 416.1 993.9 407.3 984.5 401.0C966.8 389.2 943.9 373.1 943.0 371.9C942.7 371.5 940.0 369.2 936.9 366.8C932.3 363.3 925.1 357.1 915.6 348.5C905.7 339.6 902.4 336.6 896.0 330.6C878.0 313.6 860.2 299.4 831.7 279.5C815.6 268.2 787.7 248.0 787.0 247.1C786.7 246.8 783.4 243.9 779.5 240.8C775.6 237.7 771.4 234.1 770.0 232.8C768.6 231.6 764.4 227.6 760.5 224.1C756.6 220.5 748.5 212.9 742.4 207.1C736.3 201.3 728.7 194.0 725.4 191.0C714.4 180.7 693.7 165.0 659.6 141.0C638.2 126.0 630.9 120.3 613.5 105.0C596.6 90.1 588.5 83.6 584.5 81.8C581.9 80.7 581.6 80.9 575.1 87.6C571.4 91.4 564.3 99.2 559.3 105.0C551.0 114.6 537.4 128.3 530.9 133.6C524.5 138.8 503.6 151.8 488.5 160.0C484.1 162.4 478.8 165.4 476.8 166.7C474.7 167.9 472.8 169.0 472.4 169.0C471.1 169.0 459.2 176.6 451.5 182.4C443.8 188.1 436.8 194.9 408.5 224.0C389.8 243.2 376.6 253.8 328.3 288.7C321.6 293.5 310.7 301.8 304.0 307.0C297.3 312.2 288.3 319.2 284.0 322.5C261.4 340.0 248.3 350.4 237.5 359.3C226.0 368.9 221.1 373.4 191.5 402.0C158.0 434.3 146.2 442.4 109.5 458.0C89.8 466.4 81.8 470.3 80.2 472.2C78.9 473.9 80.4 484.4 85.2 506.1C88.1 519.2 88.3 522.1 88.3 538.0C88.3 549.0 87.7 559.6 86.7 566.5C83.3 589.5 83.0 597.6 82.8 673.0C82.5 751.3 82.5 750.5 86.5 780.5C89.8 804.6 91.0 817.3 91.7 835.0C93.1 868.7 92.4 909.6 90.0 932.0C89.5 936.7 88.6 946.6 88.0 954.0C86.5 973.6 83.5 981.7 74.9 989.4C67.4 996.2 61.0 998.5 49.5 998.5C37.5 998.5 30.9 995.8 23.2 988.1C12.6 977.4 11.0 970.1 13.4 942.3C14.3 930.9 15.6 916.1 16.1 909.5C18.4 883.2 16.7 824.0 13.0 798.5C7.8 762.4 7.6 758.7 7.7 693.5C7.8 596.2 8.0 589.9 10.6 568.5C14.2 539.3 14.1 533.2 9.2 509.5C4.5 486.3 3.4 474.1 5.0 461.7C7.7 439.9 18.7 422.4 38.0 409.4C43.7 405.5 64.0 395.5 75.0 391.1C105.6 378.9 111.5 374.7 149.9 337.4C186.6 301.9 222.7 272.9 311.0 208.1C335.6 190.0 341.3 185.0 371.0 155.0C403.1 122.7 411.7 116.2 454.0 92.8C484.1 76.1 485.9 74.7 508.8 48.8C518.3 37.9 526.5 29.0 526.8 29.0C527.2 29.0 529.8 26.9 532.5 24.3C547.4 10.4 566.8 3.1 585.5 4.3C604.9 5.5 623.2 14.4 646.9 34.3C652.2 38.7 656.7 42.6 657.0 43.0C657.3 43.4 661.3 47.0 666.0 51.0C670.7 55.1 674.7 58.7 675.0 59.0C676.2 60.4 688.8 69.7 699.2 76.9C746.4 109.4 762.6 122.3 797.4 155.4C824.7 181.4 837.5 191.7 869.6 214.0C880.2 221.4 920.0 250.7 921.0 251.9C921.3 252.3 924.9 255.4 929.0 258.9C933.1 262.4 942.4 270.8 949.5 277.5C982.0 308.0 991.4 315.3 1037.5 346.0C1045.2 351.1 1055.8 358.5 1061.0 362.5C1066.2 366.4 1074.1 372.0 1078.5 375.0C1086.8 380.6 1097.9 388.2 1109.0 395.9C1134.0 413.2 1152.9 433.6 1159.0 449.8C1166.7 470.3 1165.6 488.4 1154.4 520.8C1152.1 527.6 1151.9 529.3 1152.1 545.3C1152.2 554.8 1152.8 567.9 1153.5 574.5C1154.2 581.1 1155.3 595.3 1155.9 606.0C1156.5 616.7 1157.2 628.0 1157.5 631.0C1157.7 634.0 1158.2 644.1 1158.5 653.5C1158.9 662.9 1159.5 675.5 1160.1 681.5C1160.6 687.5 1161.5 698.6 1162.1 706.0C1163.9 727.6 1162.7 761.0 1159.1 789.5C1157.4 802.7 1155.8 815.5 1155.5 818.0C1155.2 820.5 1154.6 826.5 1154.1 831.5C1150.1 868.1 1149.3 898.0 1151.6 921.5C1151.8 924.2 1152.5 931.2 1153.1 937.0C1156.3 969.7 1156.2 974.3 1151.9 983.5C1144.8 998.5 1126.2 1007.7 1110.0 1004.1ZM409.5 829.1C389.0 823.0 374.8 808.7 345.5 764.5C331.1 742.7 318.2 727.0 314.8 727.0C312.8 727.0 303.0 738.1 295.8 748.5C278.6 773.2 278.9 772.8 272.6 776.0C252.6 786.1 230.4 768.2 235.9 746.4C237.2 741.5 251.0 720.1 261.5 707.0C282.0 681.3 305.0 670.7 327.5 676.5C347.8 681.8 362.3 695.8 389.0 736.0C403.5 757.8 410.9 767.7 417.8 774.4L422.9 779.3L426.4 776.6C431.6 772.6 438.9 763.1 455.1 739.0C472.7 712.9 478.1 705.8 488.1 695.8C501.9 682.1 513.3 676.2 527.9 675.3C549.3 673.9 567.8 684.8 587.0 710.0C592.4 717.1 596.5 723.1 616.1 751.9C624.1 763.8 637.1 779.0 639.3 779.0C642.2 779.0 655.1 763.1 669.1 742.3C688.1 713.9 694.3 705.7 704.0 696.0C720.0 680.0 733.2 674.2 751.0 675.2C775.7 676.7 791.7 691.0 826.5 743.3C838.9 762.0 847.3 772.6 852.8 776.8L856.1 779.3L862.8 772.4C866.5 768.6 873.8 759.2 878.9 751.5C889.7 735.3 892.0 732.6 897.5 729.7C903.2 726.6 915.8 726.6 921.6 729.7C933.3 735.9 938.8 751.0 933.7 762.8C929.8 771.7 908.9 800.0 898.7 810.3C877.1 831.9 853.8 836.6 830.3 824.3C816.2 816.8 803.1 802.2 781.5 769.8C759.9 737.4 750.1 725.8 746.1 727.9C741.6 730.4 730.7 744.1 715.8 766.4C707.0 779.5 696.8 793.9 693.3 798.2C676.1 819.6 660.1 829.7 642.2 830.8C622.4 831.9 603.6 821.5 586.5 799.7C584.9 797.6 582.5 794.7 581.4 793.2C580.2 791.7 573.0 781.3 565.5 770.0C546.6 742.0 537.7 730.5 532.6 727.8C529.2 725.9 519.4 737.2 501.7 763.5C471.5 808.5 457.4 822.7 436.8 829.1C429.2 831.5 417.6 831.5 409.5 829.1ZM416.5 680.0C401.1 677.9 387.4 669.1 372.4 651.5C366.6 644.7 356.2 630.1 344.6 612.5C330.9 591.7 318.6 577.0 314.9 577.0C312.1 577.0 301.1 589.8 291.5 604.1C286.6 611.5 280.9 619.0 279.0 620.9C263.6 635.9 237.0 625.9 235.2 604.4C234.6 597.0 236.6 591.9 245.1 579.3C266.9 546.8 279.9 534.1 299.0 526.7C307.5 523.3 324.1 523.7 333.0 527.4C351.8 535.2 364.9 548.9 390.5 587.5C405.9 610.8 419.9 628.0 423.6 628.0C425.0 628.0 437.5 614.5 441.6 608.5C443.1 606.3 450.3 595.6 457.7 584.6C477.6 555.1 485.6 545.5 498.5 535.9C518.8 520.8 541.2 520.3 562.1 534.3C575.3 543.2 586.0 556.2 609.4 591.5C622.7 611.5 636.3 628.0 639.6 628.0C642.6 628.0 655.7 611.6 670.8 589.2C679.7 575.9 687.8 564.0 688.8 562.8C712.9 533.0 725.9 524.5 747.5 524.5C758.6 524.5 764.7 526.1 773.5 531.3C788.8 540.3 799.8 552.9 825.3 590.9C839.4 611.9 852.5 628.0 855.5 628.0C857.9 628.0 870.6 613.2 879.7 599.9C890.6 583.8 893.6 580.7 900.9 577.9C916.6 572.0 933.3 582.8 935.6 600.2C936.7 608.6 932.0 617.4 912.4 643.6C885.3 679.8 857.3 689.2 827.5 672.1C821.2 668.5 804.5 652.5 799.5 645.2C797.8 642.9 791.4 633.5 785.1 624.2C763.6 592.7 756.8 583.7 750.6 578.8L747.2 576.1L741.7 581.3C735.4 587.3 730.4 594.0 712.6 620.4C689.7 654.5 678.4 666.6 662.5 674.4C643.2 684.0 623.6 681.9 606.0 668.5C593.4 658.8 585.9 649.6 562.5 615.0C550.2 596.7 542.6 586.9 536.1 580.5L531.0 575.5L524.2 582.5C520.4 586.5 510.6 599.7 501.6 613.0C478.1 647.6 470.1 657.6 457.5 667.9C451.9 672.4 438.5 678.7 432.5 679.5C429.8 679.8 426.4 680.3 425.0 680.4C423.6 680.6 419.8 680.4 416.5 680.0Z" fill-rule="evenodd" fill="currentColor"/></symbol></svg>
+<header class="top"><a class="brand" href="#top"><svg><use href="#house"/></svg>Casa Mar</a><span class="lab">Journal de design</span></header>
+
+<main id="top">
+<div class="wrap hero">
+  <div class="meta lab"><span>20 nov. 2026</span><span>Motion</span><span>Lecture 4 min</span></div>
+  <h1>Casa Mar : <em>ASCII</em> motions</h1>
+  <p class="dek">La maison, la mer, le soleil rayé et nos lettres, redessinés avec des caractères de machine à écrire, et animés en temps réel.</p>
+  <div class="tags lab"><span>Motion</span><span>ASCII</span><span>Génératif</span><span>Identité</span></div>
+</div>
+
+<section class="panel wide" aria-label="Démo principale : la maison sur la mer en ASCII">
+  <canvas id="c-hero" height="620" role="img" aria-label="Animation ASCII : la maison Casa Mar sur la mer, soleil rayé derrière, vagues en caractères"></canvas>
+  <div class="cap mono"><span>01 · La maison sur la mer · passe la souris sur l'eau</span><span id="fps-hero">—</span></div>
+</section>
+
+<div class="controls" role="group" aria-label="Réglages des démos">
+  <div class="seg" role="group" aria-label="Jeu de caractères" id="charsets"></div>
+  <label class="mono">taille <input type="range" id="cell" min="8" max="20" value="12" aria-label="Taille des caractères"></label>
+  <div class="dots" role="group" aria-label="Charte graphique">
+    <button data-set="1" aria-pressed="true" title="Orange et bleu" aria-label="Charte orange et bleu" style="--c1:#E8B04A;--c2:#7BB1DD"></button>
+    <button data-set="2" aria-pressed="false" title="Rouge et rose" aria-label="Charte rouge et rose" style="--c1:#D9203D;--c2:#F4A195"></button>
+    <button data-set="3" aria-pressed="false" title="Pêche et citron" aria-label="Charte pêche et citron" style="--c1:#E4A479;--c2:#E9F188"></button>
+  </div>
+  <button class="copy" id="copy">Copier l'image en texte</button>
+</div>
+
+<article class="wrap">
+  <p>Pour la première édition de Casa Mar, on voulait un langage de motion qui tienne dans un fil Instagram comme sur un écran géant au Clos de Provence. Quelque chose de chaleureux et d'un peu bricolé, comme une maison de vacances. L'ASCII coche toutes les cases : c'est léger, ça vit en temps réel et ça se lit de loin. Et ça a le charme des vieux terminaux et des tickets de caisse.</p>
+  <p>Le principe : on dessine nos formes normalement dans une petite image invisible, puis chaque case de la grille est remplacée par un caractère choisi selon la luminosité. La couleur vient de la charte, et chaque élément garde la sienne.</p>
+  <p class="pull">Une maison, la mer, la nuit. Rien que des caractères.</p>
+
+  <h2><small>02</small>La rampe</h2>
+  <p>Tout repose sur une rampe : une suite de caractères rangés du plus vide au plus plein. On en a construit trois, une par usage.</p>
+  <div class="ramp" id="ramp" aria-label="Rampe de caractères active"></div>
+  <ul>
+    <li><strong>Classique</strong> : la rampe historique des terminaux, la plus lisible.</li>
+    <li><strong>Maison</strong> : des points, des vagues <code>~ ≈</code> et la petite maison <code>⌂</code> pour les zones les plus denses.</li>
+    <li><strong>Blocs</strong> : les demi-tons <code>░ ▒ ▓ █</code>, plus graphiques, parfaits pour l'affichage grand format.</li>
+  </ul>
+</article>
+
+<div class="grid2">
+  <section class="panel" aria-label="Démo : la typo qui se brouille">
+    <canvas id="c-type" height="420" role="img" aria-label="Animation ASCII : les mots FAIS, COMME, CHEZ, TOI, LINE, UP, JUIN, 2028 l'un après l'autre, en lettres Kokoschka faites de caractères"></canvas>
+    <div class="cap mono"><span>02 · Kokoschka en caractères</span><span>clic : mot suivant</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : le soleil rayé">
+    <canvas id="c-sun" height="420" role="img" aria-label="Animation ASCII : le soleil rayé qui se couche dans la mer"></canvas>
+    <div class="cap mono"><span>03 · Le soleil rayé</span><span>motif du tote bag</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : la maison qui se dessine">
+    <canvas id="c-draw" height="420" role="img" aria-label="Animation ASCII : la maison se construit de bas en haut, caractère par caractère"></canvas>
+    <div class="cap mono"><span>04 · La maison se dessine</span><span>boucle de 4 s</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : la houle">
+    <canvas id="c-waves" height="420" role="img" aria-label="Animation ASCII : une houle de caractères tilde"></canvas>
+    <div class="cap mono"><span>05 · La houle</span><span>bouge la souris</span></div>
+  </section>
+</div>
+
+<article class="wrap">
+  <h2><small>03</small>Comment ça bouge</h2>
+  <p>Chaque animation est un petit dessin refait 30 fois par seconde. La maison et le soleil viennent du logo vectoriel, la typo vient directement de Kokoschka : on trace les lettres dans l'image invisible, la grille fait le reste.</p>
+  <ul>
+    <li><strong>La couleur par élément.</strong> Le dessin invisible sépare les éléments par canal : la maison et la typo dans le rouge, le soleil dans le vert, la mer dans le bleu. Chaque caractère prend la couleur de la charte de l'élément qui domine sa case.</li>
+    <li><strong>La souris comme une pierre dans l'eau.</strong> Sous le curseur, la grille se déforme en ondes concentriques : les caractères glissent puis reviennent.</li>
+    <li><strong>Le brouillage.</strong> Pour changer de mot, chaque case passe par trois ou quatre caractères au hasard avant de se poser. La transition dure 600 ms, de gauche à droite.</li>
+    <li><strong>Les étoiles.</strong> Quelques points isolés scintillent dans les trois couleurs de la charte, comme dans nos teasers.</li>
+  </ul>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Paramètre</th><th>Valeur</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td>Cadence</td><td><code>30 i/s</code></td><td>Assez fluide, et ça garde un côté machine.</td></tr>
+      <tr><td>Cellule</td><td><code>12 px</code> (réglable 8 à 20)</td><td>Lisible sur mobile, dense sur grand écran.</td></tr>
+      <tr><td>Rampe classique</td><td><code> .:-=+*#%@</code></td><td>10 niveaux de densité.</td></tr>
+      <tr><td>Onde de la souris</td><td>rayon <code>14 cases</code>, amorti <code>0,92</code></td><td>Une ride, pas une tempête.</td></tr>
+      <tr><td>Brouillage</td><td><code>600 ms</code>, décalage <code>8 ms</code> par colonne</td><td>Le mot se pose de gauche à droite.</td></tr>
+      <tr><td>Dessin de la maison</td><td><code>4 s</code>, de bas en haut</td><td>Comme une construction.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><small>04</small>Trois chartes</h2>
+  <p>Comme pour nos teasers, l'ASCII existe dans les trois identités de Casa Mar. Le fond, l'accent et la couleur secondaire changent, les rampes restent les mêmes. Teste-les avec les pastilles au-dessus des démos.</p>
+
+  <h2><small>05</small>Où on l'utilise</h2>
+  <ul>
+    <li><strong>Les stories et reels</strong> : capturés en vidéo, ces motions servent de fonds et de transitions entre deux annonces du line-up.</li>
+    <li><strong>Les écrans sur place</strong> : la houle et la maison tournent en boucle, avec la taille de caractère au maximum.</li>
+    <li><strong>Les messages</strong> : le bouton « Copier l'image en texte » copie l'image du moment en vrais caractères, à coller dans un message, un tweet ou un mail.</li>
+  </ul>
+
+  <div class="credits">
+    <div><span class="lab">Projet</span>Casa Mar, première édition</div>
+    <div><span class="lab">Identité</span>Kokoschka, Stolzl, trois palettes</div>
+    <div><span class="lab">Techno</span>Canvas 2D, JavaScript, IBM Plex Mono</div>
+    <div><span class="lab">Infos</span>Juin 2028 · Clos de Provence, Nîmes · 18+</div>
+  </div>
+</article>
+</main>
+<footer><span>Casa Mar · Fais comme chez toi</span><span>Billets : Early 22€ avant 14h · Plein tarif 30€ · VIP 60€</span></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(async () => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const root = document.documentElement;
+const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+const HOUSE = new Path2D("M1110.0 1004.1C1103.7 1002.7 1095.3 998.0 1091.2 993.6C1083.7 985.4 1080.9 977.3 1079.5 959.5C1079.1 955.1 1078.7 949.9 1078.5 948.0C1075.9 925.4 1075.5 916.9 1075.5 890.0C1075.6 872.9 1076.1 854.7 1076.8 848.5C1077.4 842.5 1078.3 834.1 1078.6 830.0C1079.2 822.6 1081.9 798.9 1084.0 783.5C1087.1 760.6 1087.7 753.0 1087.9 736.5C1088.0 726.6 1087.6 714.0 1087.0 708.5C1086.5 703.0 1085.8 696.0 1085.5 693.0C1085.0 687.4 1083.5 661.8 1082.5 641.0C1081.5 620.6 1080.0 598.0 1078.1 575.5C1074.6 533.1 1075.6 519.2 1083.8 494.5C1089.5 477.5 1089.4 477.8 1086.2 474.4C1079.4 467.0 1070.6 460.4 1040.5 440.2C1031.2 433.9 1018.5 425.0 1012.5 420.5C1006.5 416.1 993.9 407.3 984.5 401.0C966.8 389.2 943.9 373.1 943.0 371.9C942.7 371.5 940.0 369.2 936.9 366.8C932.3 363.3 925.1 357.1 915.6 348.5C905.7 339.6 902.4 336.6 896.0 330.6C878.0 313.6 860.2 299.4 831.7 279.5C815.6 268.2 787.7 248.0 787.0 247.1C786.7 246.8 783.4 243.9 779.5 240.8C775.6 237.7 771.4 234.1 770.0 232.8C768.6 231.6 764.4 227.6 760.5 224.1C756.6 220.5 748.5 212.9 742.4 207.1C736.3 201.3 728.7 194.0 725.4 191.0C714.4 180.7 693.7 165.0 659.6 141.0C638.2 126.0 630.9 120.3 613.5 105.0C596.6 90.1 588.5 83.6 584.5 81.8C581.9 80.7 581.6 80.9 575.1 87.6C571.4 91.4 564.3 99.2 559.3 105.0C551.0 114.6 537.4 128.3 530.9 133.6C524.5 138.8 503.6 151.8 488.5 160.0C484.1 162.4 478.8 165.4 476.8 166.7C474.7 167.9 472.8 169.0 472.4 169.0C471.1 169.0 459.2 176.6 451.5 182.4C443.8 188.1 436.8 194.9 408.5 224.0C389.8 243.2 376.6 253.8 328.3 288.7C321.6 293.5 310.7 301.8 304.0 307.0C297.3 312.2 288.3 319.2 284.0 322.5C261.4 340.0 248.3 350.4 237.5 359.3C226.0 368.9 221.1 373.4 191.5 402.0C158.0 434.3 146.2 442.4 109.5 458.0C89.8 466.4 81.8 470.3 80.2 472.2C78.9 473.9 80.4 484.4 85.2 506.1C88.1 519.2 88.3 522.1 88.3 538.0C88.3 549.0 87.7 559.6 86.7 566.5C83.3 589.5 83.0 597.6 82.8 673.0C82.5 751.3 82.5 750.5 86.5 780.5C89.8 804.6 91.0 817.3 91.7 835.0C93.1 868.7 92.4 909.6 90.0 932.0C89.5 936.7 88.6 946.6 88.0 954.0C86.5 973.6 83.5 981.7 74.9 989.4C67.4 996.2 61.0 998.5 49.5 998.5C37.5 998.5 30.9 995.8 23.2 988.1C12.6 977.4 11.0 970.1 13.4 942.3C14.3 930.9 15.6 916.1 16.1 909.5C18.4 883.2 16.7 824.0 13.0 798.5C7.8 762.4 7.6 758.7 7.7 693.5C7.8 596.2 8.0 589.9 10.6 568.5C14.2 539.3 14.1 533.2 9.2 509.5C4.5 486.3 3.4 474.1 5.0 461.7C7.7 439.9 18.7 422.4 38.0 409.4C43.7 405.5 64.0 395.5 75.0 391.1C105.6 378.9 111.5 374.7 149.9 337.4C186.6 301.9 222.7 272.9 311.0 208.1C335.6 190.0 341.3 185.0 371.0 155.0C403.1 122.7 411.7 116.2 454.0 92.8C484.1 76.1 485.9 74.7 508.8 48.8C518.3 37.9 526.5 29.0 526.8 29.0C527.2 29.0 529.8 26.9 532.5 24.3C547.4 10.4 566.8 3.1 585.5 4.3C604.9 5.5 623.2 14.4 646.9 34.3C652.2 38.7 656.7 42.6 657.0 43.0C657.3 43.4 661.3 47.0 666.0 51.0C670.7 55.1 674.7 58.7 675.0 59.0C676.2 60.4 688.8 69.7 699.2 76.9C746.4 109.4 762.6 122.3 797.4 155.4C824.7 181.4 837.5 191.7 869.6 214.0C880.2 221.4 920.0 250.7 921.0 251.9C921.3 252.3 924.9 255.4 929.0 258.9C933.1 262.4 942.4 270.8 949.5 277.5C982.0 308.0 991.4 315.3 1037.5 346.0C1045.2 351.1 1055.8 358.5 1061.0 362.5C1066.2 366.4 1074.1 372.0 1078.5 375.0C1086.8 380.6 1097.9 388.2 1109.0 395.9C1134.0 413.2 1152.9 433.6 1159.0 449.8C1166.7 470.3 1165.6 488.4 1154.4 520.8C1152.1 527.6 1151.9 529.3 1152.1 545.3C1152.2 554.8 1152.8 567.9 1153.5 574.5C1154.2 581.1 1155.3 595.3 1155.9 606.0C1156.5 616.7 1157.2 628.0 1157.5 631.0C1157.7 634.0 1158.2 644.1 1158.5 653.5C1158.9 662.9 1159.5 675.5 1160.1 681.5C1160.6 687.5 1161.5 698.6 1162.1 706.0C1163.9 727.6 1162.7 761.0 1159.1 789.5C1157.4 802.7 1155.8 815.5 1155.5 818.0C1155.2 820.5 1154.6 826.5 1154.1 831.5C1150.1 868.1 1149.3 898.0 1151.6 921.5C1151.8 924.2 1152.5 931.2 1153.1 937.0C1156.3 969.7 1156.2 974.3 1151.9 983.5C1144.8 998.5 1126.2 1007.7 1110.0 1004.1ZM409.5 829.1C389.0 823.0 374.8 808.7 345.5 764.5C331.1 742.7 318.2 727.0 314.8 727.0C312.8 727.0 303.0 738.1 295.8 748.5C278.6 773.2 278.9 772.8 272.6 776.0C252.6 786.1 230.4 768.2 235.9 746.4C237.2 741.5 251.0 720.1 261.5 707.0C282.0 681.3 305.0 670.7 327.5 676.5C347.8 681.8 362.3 695.8 389.0 736.0C403.5 757.8 410.9 767.7 417.8 774.4L422.9 779.3L426.4 776.6C431.6 772.6 438.9 763.1 455.1 739.0C472.7 712.9 478.1 705.8 488.1 695.8C501.9 682.1 513.3 676.2 527.9 675.3C549.3 673.9 567.8 684.8 587.0 710.0C592.4 717.1 596.5 723.1 616.1 751.9C624.1 763.8 637.1 779.0 639.3 779.0C642.2 779.0 655.1 763.1 669.1 742.3C688.1 713.9 694.3 705.7 704.0 696.0C720.0 680.0 733.2 674.2 751.0 675.2C775.7 676.7 791.7 691.0 826.5 743.3C838.9 762.0 847.3 772.6 852.8 776.8L856.1 779.3L862.8 772.4C866.5 768.6 873.8 759.2 878.9 751.5C889.7 735.3 892.0 732.6 897.5 729.7C903.2 726.6 915.8 726.6 921.6 729.7C933.3 735.9 938.8 751.0 933.7 762.8C929.8 771.7 908.9 800.0 898.7 810.3C877.1 831.9 853.8 836.6 830.3 824.3C816.2 816.8 803.1 802.2 781.5 769.8C759.9 737.4 750.1 725.8 746.1 727.9C741.6 730.4 730.7 744.1 715.8 766.4C707.0 779.5 696.8 793.9 693.3 798.2C676.1 819.6 660.1 829.7 642.2 830.8C622.4 831.9 603.6 821.5 586.5 799.7C584.9 797.6 582.5 794.7 581.4 793.2C580.2 791.7 573.0 781.3 565.5 770.0C546.6 742.0 537.7 730.5 532.6 727.8C529.2 725.9 519.4 737.2 501.7 763.5C471.5 808.5 457.4 822.7 436.8 829.1C429.2 831.5 417.6 831.5 409.5 829.1ZM416.5 680.0C401.1 677.9 387.4 669.1 372.4 651.5C366.6 644.7 356.2 630.1 344.6 612.5C330.9 591.7 318.6 577.0 314.9 577.0C312.1 577.0 301.1 589.8 291.5 604.1C286.6 611.5 280.9 619.0 279.0 620.9C263.6 635.9 237.0 625.9 235.2 604.4C234.6 597.0 236.6 591.9 245.1 579.3C266.9 546.8 279.9 534.1 299.0 526.7C307.5 523.3 324.1 523.7 333.0 527.4C351.8 535.2 364.9 548.9 390.5 587.5C405.9 610.8 419.9 628.0 423.6 628.0C425.0 628.0 437.5 614.5 441.6 608.5C443.1 606.3 450.3 595.6 457.7 584.6C477.6 555.1 485.6 545.5 498.5 535.9C518.8 520.8 541.2 520.3 562.1 534.3C575.3 543.2 586.0 556.2 609.4 591.5C622.7 611.5 636.3 628.0 639.6 628.0C642.6 628.0 655.7 611.6 670.8 589.2C679.7 575.9 687.8 564.0 688.8 562.8C712.9 533.0 725.9 524.5 747.5 524.5C758.6 524.5 764.7 526.1 773.5 531.3C788.8 540.3 799.8 552.9 825.3 590.9C839.4 611.9 852.5 628.0 855.5 628.0C857.9 628.0 870.6 613.2 879.7 599.9C890.6 583.8 893.6 580.7 900.9 577.9C916.6 572.0 933.3 582.8 935.6 600.2C936.7 608.6 932.0 617.4 912.4 643.6C885.3 679.8 857.3 689.2 827.5 672.1C821.2 668.5 804.5 652.5 799.5 645.2C797.8 642.9 791.4 633.5 785.1 624.2C763.6 592.7 756.8 583.7 750.6 578.8L747.2 576.1L741.7 581.3C735.4 587.3 730.4 594.0 712.6 620.4C689.7 654.5 678.4 666.6 662.5 674.4C643.2 684.0 623.6 681.9 606.0 668.5C593.4 658.8 585.9 649.6 562.5 615.0C550.2 596.7 542.6 586.9 536.1 580.5L531.0 575.5L524.2 582.5C520.4 586.5 510.6 599.7 501.6 613.0C478.1 647.6 470.1 657.6 457.5 667.9C451.9 672.4 438.5 678.7 432.5 679.5C429.8 679.8 426.4 680.3 425.0 680.4C423.6 680.6 419.8 680.4 416.5 680.0Z");
+const HVB = "0 0 1168 1009".split(' ').map(Number);             // 0 0 w h
+try { const f = new FontFace('Kokoschka', 'url(assets/fonts/Kokoschka-casa.woff2)'); await f.load(); document.fonts.add(f); } catch {}
+try { await document.fonts.load('600 12px "IBM Plex Mono"'); } catch {}
+
+const SETS = {
+  Classique: ' .:-=+*#%@',
+  Maison: ' .·:~≈=⌂',
+  Blocs: ' ░▒▓█',
+};
+let setName = 'Classique', RAMP = SETS[setName], CELL = 12;
+let PAL = {};
+function readPal() { PAL = { bg: css('--stage'), a: css('--a'), b: css('--b'), c: css('--paper') }; }
+readPal();
+
+/* ---------- moteur ASCII ---------- */
+function makeASCII(canvas, draw, opts = {}) {
+  const ctx = canvas.getContext('2d');
+  const off = document.createElement('canvas'), octx = off.getContext('2d', { willReadFrequently: true });
+  const st = { mx: -1e3, my: -1e3, ripples: [], cols: 0, rows: 0, text: '', canvas, opts, t0: performance.now() };
+  function size() {
+    const w = canvas.clientWidth, h = +canvas.getAttribute('height');
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    st.cw = CELL * .62; st.ch = CELL * 1.05;
+    st.cols = Math.floor(w / st.cw); st.rows = Math.floor(h / st.ch);
+    off.width = st.cols; off.height = st.rows; st.w = w; st.h = h;
+  }
+  size(); new ResizeObserver(size).observe(canvas); st.size = size;
+  canvas.addEventListener('pointermove', e => { const r = canvas.getBoundingClientRect(); const x = (e.clientX - r.left) / st.cw, y = (e.clientY - r.top) / st.ch;
+    if (Math.hypot(x - st.mx, y - st.my) > 2.5) st.ripples.push({ x, y, t: st.now || 0 }); st.mx = x; st.my = y; if (st.ripples.length > 14) st.ripples.shift(); });
+  canvas.addEventListener('pointerleave', () => { st.mx = st.my = -1e3; });
+  st.render = (t) => {
+    st.now = t;
+    const { cols, rows } = st;
+    octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = 'source-over';
+    octx.fillStyle = '#000'; octx.fillRect(0, 0, cols, rows);
+    octx.globalCompositeOperation = 'lighter';
+    draw(octx, cols, rows, t, st);
+    const img = octx.getImageData(0, 0, cols, rows).data;
+    ctx.fillStyle = PAL.bg; ctx.fillRect(0, 0, st.w, st.h);
+    ctx.font = `600 ${CELL}px "IBM Plex Mono", ui-monospace, monospace`; ctx.textBaseline = 'top';
+    const groups = { a: [], b: [], c: [], s: [] };
+    let txt = '';
+    const n = RAMP.length - 1;
+    for (let y = 0; y < rows; y++) {
+      let line = '';
+      for (let x = 0; x < cols; x++) {
+        // déformation : ondes de la souris
+        let sx = x, sy = y;
+        for (const r of st.ripples) {
+          const age = (t - r.t) / 1000; if (age > 1.6) continue;
+          const d = Math.hypot(x - r.x, (y - r.y) * 1.7), rad = age * 26;
+          const k = Math.exp(-((d - rad) ** 2) / 6) * (1 - age / 1.6) * 1.6;
+          if (k > .02) { sx += (x - r.x) / (d + .1) * k; sy += (y - r.y) / (d + .1) * k * .6; }
+        }
+        sx = Math.max(0, Math.min(cols - 1, Math.round(sx))); sy = Math.max(0, Math.min(rows - 1, Math.round(sy)));
+        const i = (sy * cols + sx) * 4, R = img[i], G = img[i + 1], B = img[i + 2];
+        const v = Math.max(R, G, B);
+        if (v < 14) { line += ' '; continue; }
+        const ch = RAMP[Math.min(n, Math.max(1, Math.round(v / 255 * n)))];
+        line += ch;
+        const g = v === R ? (opts.redIs || 'a') : v === G ? (opts.greenIs || 'a') : (opts.blueIs || 'b');
+        groups[g].push(x, y, ch);
+      }
+      txt += line.replace(/\s+$/, '') + '\n';
+    }
+    // étoiles
+    if (opts.stars) {
+      let s = 3; const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
+      for (let k = 0; k < opts.stars; k++) {
+        const x = Math.floor(rnd() * cols), y = Math.floor(rnd() * rows * opts.starTop), ph = rnd() * 6.3;
+        if (Math.sin(t / 1000 * (1 + rnd() * 2) + ph) > .3) groups.s.push(x, y, ['.', '+', '*'][k % 3], k % 3);
+      }
+    }
+    for (const key of ['a', 'b', 'c']) {
+      ctx.fillStyle = PAL[key]; const g = groups[key];
+      for (let k = 0; k < g.length; k += 3) ctx.fillText(g[k + 2], g[k] * st.cw, g[k + 1] * st.ch);
+    }
+    const sc = [PAL.a, PAL.b, PAL.c]; const g = groups.s;
+    for (let k = 0; k < g.length; k += 4) { ctx.fillStyle = sc[g[k + 3]]; ctx.fillText(g[k + 2], g[k] * st.cw, g[k + 1] * st.ch); }
+    st.text = txt;
+  };
+  return st;
+}
+
+/* helpers de dessin dans l'image invisible */
+const AR = 1.05 / .62;                                        // une case est 1,7 fois plus haute que large
+function house(o, cx, baseY, w, color, clipFrom = 1) {
+  const s = w / HVB[2], h = HVB[3] * s / AR;
+  o.save(); o.translate(cx - w / 2, baseY - h); o.scale(s, s / AR);
+  if (clipFrom < 1) { o.beginPath(); o.rect(0, HVB[3] * (1 - clipFrom), HVB[2], HVB[3]); o.clip(); }
+  o.fillStyle = color; o.fill(HOUSE, 'evenodd'); o.restore();
+  return h;
+}
+function sun(o, cx, cy, r, t, color = '#00ff00', bands = true) {
+  const rx = r * AR;
+  o.save(); o.beginPath(); o.ellipse(cx, cy, rx, r, 0, 0, 7); o.clip();
+  o.fillStyle = color; o.fillRect(cx - rx, cy - r, rx * 2, r * 2);
+  if (bands) { o.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 7; i++) { const y = cy + r * .1 + i * r * .17 + (t * r * .05) % (r * .17); o.fillRect(cx - rx, y, rx * 2, Math.max(1, r * .05 + i * r * .012)); } }
+  o.restore(); o.globalCompositeOperation = 'lighter';
+}
+function sea(o, cols, rows, top, t, amp = 1, inten = 1) {
+  for (let y = Math.floor(top); y < rows; y++) {
+    const k = (y - top) / (rows - top);
+    for (let x = 0; x < cols; x++) {
+      const w = Math.sin(x * (.16 - k * .08) + t * 1.4 + y * .9) * .5 + Math.sin(x * .05 - t * .8 + y * .35) * .5;
+      const v = Math.max(0, w) ** 2 * (60 + 180 * k) * amp * inten;
+      if (v > 8) { o.fillStyle = `rgb(0,0,${Math.min(255, v | 0)})`; o.fillRect(x, y, 1, 1); }
+    }
+  }
+}
+
+/* ---------- 01 la maison sur la mer ---------- */
+const hero = makeASCII($('#c-hero'), (o, cols, rows, ms) => {
+  const t = ms / 1000, hz = rows * .64;
+  sun(o, cols * .5, hz - rows * .02 + Math.sin(t * .2) * 1.5, rows * .26, t);
+  o.globalCompositeOperation = 'source-over'; o.fillStyle = '#000'; o.fillRect(0, hz, cols, rows); o.globalCompositeOperation = 'lighter';
+  house(o, cols * .5, hz + 1 + Math.sin(t * 1.2) * .5, Math.min(cols * .34, rows * 1.15), '#ff0000');
+  sea(o, cols, rows, hz + 1, t);
+  // reflet de la maison
+  o.save(); o.globalAlpha = .35; o.translate(0, (hz + 1) * 2); o.scale(1, -1);
+  house(o, cols * .5 + Math.sin(t * 3) * .6, hz + 1, Math.min(cols * .34, rows * 1.15), '#ff0000'); o.restore();
+}, { stars: 70, starTop: .4, redIs: 'c', greenIs: 'a', blueIs: 'b' });
+
+/* ---------- 02 typo ---------- */
+const WORDS = ['FAIS', 'COMME', 'CHEZ', 'TOI', 'LINE', 'UP', 'JUIN', '2028'];
+let wi = 0, wSince = 0;
+const type = makeASCII($('#c-type'), (o, cols, rows, ms, st) => {
+  if (!wSince) wSince = ms;
+  if (ms - wSince > 1500) { wi = (wi + 1) % WORDS.length; wSince = ms; }
+  const word = WORDS[wi];
+  o.fillStyle = '#ff0000'; o.textAlign = 'center'; o.textBaseline = 'middle';
+  let fs = rows * .62; o.font = `${fs}px Kokoschka`;
+  const w = o.measureText(word).width * AR; if (w > cols * .9) { fs *= cols * .9 / w; o.font = `${fs}px Kokoschka`; }
+  o.textBaseline = 'alphabetic'; const m = o.measureText(word), gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  o.save(); o.translate(cols / 2, rows * .46 - gh / 2 + m.actualBoundingBoxAscent); o.scale(AR, 1); o.fillText(word, 0, 0); o.restore();
+  // ligne de vagues sous le mot
+  o.fillStyle = '#0000ff';
+  for (let x = cols * .3; x < cols * .7; x++) o.fillRect(x, rows * .46 + gh / 2 + 3 + Math.sin(x * .5 + ms / 300) * 1.2, 1, 1.2);
+  st.scramble = Math.max(0, 1 - (ms - wSince) / 600);
+}, { redIs: 'a', blueIs: 'b' });
+$('#c-type').addEventListener('click', () => { wi = (wi + 1) % WORDS.length; wSince = performance.now(); });
+// brouillage : surcouche sur le rendu de base
+const baseTypeRender = type.render;
+type.render = t => {
+  const keep = RAMP; const k = type.scramble || 0;
+  if (k > 0 && !reduce) { RAMP = [...RAMP].sort(() => Math.random() - .5).join(''); RAMP = keep[0] + RAMP.replace(keep[0], ''); }
+  baseTypeRender(t); RAMP = keep;
+};
+
+/* ---------- 03 soleil ---------- */
+const sunD = makeASCII($('#c-sun'), (o, cols, rows, ms) => {
+  const t = ms / 1000, hz = rows * .66, ph = (t % 9) / 9;
+  sun(o, cols * .5, hz - rows * .22 + ph * rows * .45, rows * .3, t * 2);
+  o.globalCompositeOperation = 'source-over'; o.fillStyle = '#000'; o.fillRect(0, hz, cols, rows); o.globalCompositeOperation = 'lighter';
+  sea(o, cols, rows, hz, t, .9);
+  // reflet doré
+  for (let y = Math.ceil(hz); y < rows; y++) { const w = (1 - ph) * cols * .25 * (1 - (y - hz) / rows); if (Math.sin(y * 1.3 + t * 4) > 0) { o.fillStyle = '#00b400'; o.fillRect(cols * .5 - w / 2, y, w, 1); } }
+}, { stars: 40, starTop: .5, greenIs: 'a', blueIs: 'b' });
+
+/* ---------- 04 la maison se dessine ---------- */
+const draw = makeASCII($('#c-draw'), (o, cols, rows, ms) => {
+  const t = (ms / 1000) % 4, k = Math.min(1, t / 2.6);
+  const ease = k * k * (3 - 2 * k);
+  house(o, cols * .5, rows * .82, Math.min(cols * .5, rows * 1.6), '#ff0000', ease);
+  // la « tête » qui construit : une ligne lumineuse
+  if (k < 1) { const ww = Math.min(cols * .5, rows * 1.6); const hh = HVB[3] * ww / HVB[2] / AR; const y = rows * .82 - hh * ease;
+    o.fillStyle = '#0000ff'; o.fillRect(cols * .5 - ww * .55, y, ww * 1.1, 1); }
+  for (let x = 0; x < cols; x++) { o.fillStyle = '#0000a0'; o.fillRect(x, rows * .82 + 1 + Math.round(Math.sin(x * .35 + ms / 400) * .6), 1, 1); }
+  if (t > 3.5) { o.globalCompositeOperation = 'source-over'; o.fillStyle = `rgba(0,0,0,${(t - 3.5) * 2})`; o.fillRect(0, 0, cols, rows); }
+}, { redIs: 'a', blueIs: 'b' });
+
+/* ---------- 05 la houle ---------- */
+const waves = makeASCII($('#c-waves'), (o, cols, rows, ms, st) => {
+  const t = ms / 1000;
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    let v = Math.sin(x * .22 + y * .55 + t * 1.6) + Math.sin(x * .07 - y * .2 - t * .9) * .8 + Math.sin((x + y) * .13 + t * .5) * .4;
+    const d = Math.hypot(x - st.mx, (y - st.my) * 1.8); v += Math.sin(d * .7 - t * 6) * Math.exp(-d / 9) * 1.6;
+    const val = Math.max(0, (v + 1.2) / 3.4) ** 1.6 * 255;
+    o.fillStyle = y < rows * .08 + Math.sin(x * .2 + t) * 1.5 ? `rgb(${val | 0},0,0)` : `rgb(0,0,${val | 0})`;
+    o.fillRect(x, y, 1, 1);
+  }
+}, { redIs: 'a', blueIs: 'b' });
+
+const all = [hero, type, sunD, draw, waves];
+
+/* ---------- boucle : 30 i/s, seulement les démos visibles ---------- */
+const vis = new Set();
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)));
+all.forEach(s => io.observe(s.canvas));
+let last = 0, fpsN = 0, fpsT = 0;
+function loop(now) {
+  if (now - last >= 33) {
+    last = now;
+    all.forEach(s => { if (vis.has(s.canvas)) s.render(now); });
+    fpsN++; if (now - fpsT > 1000) { $('#fps-hero').textContent = `${hero.cols}×${hero.rows} car. · ${fpsN} i/s`; fpsN = 0; fpsT = now; }
+  }
+  requestAnimationFrame(loop);
+}
+all.forEach(s => s.render(1800));                         // premier rendu immédiat
+if (!reduce) requestAnimationFrame(loop); else $('#fps-hero').textContent = 'animations réduites';
+
+/* ---------- réglages ---------- */
+const segs = $('#charsets');
+segs.innerHTML = Object.keys(SETS).map(k => `<button aria-pressed="${k === setName}" data-k="${k}">${k}</button>`).join('');
+function rampView() { $('#ramp').textContent = RAMP.replace(' ', '␣'); }
+rampView();
+segs.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setName = b.dataset.k; RAMP = SETS[setName];
+  $$('#charsets button').forEach(x => x.setAttribute('aria-pressed', x === b)); rampView(); if (reduce) all.forEach(s => s.render(1800)); });
+$('#cell').addEventListener('input', e => { CELL = +e.target.value; all.forEach(s => { s.size(); s.render(performance.now()); }); });
+$$('[data-set]').forEach(b => b.addEventListener('click', () => { root.dataset.id = b.dataset.set;
+  $$('.dots button').forEach(x => x.setAttribute('aria-pressed', x.dataset.set === b.dataset.set)); readPal(); all.forEach(s => s.render(performance.now())); }));
+let tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600); }
+$('#copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(hero.text); toast('Image copiée en texte : colle-la où tu veux'); }
+  catch { toast('La copie est bloquée par ce navigateur'); }
+});
+})();
+</script>
+</body>
+</html>

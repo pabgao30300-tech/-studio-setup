@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fr" data-id="1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casa Mar · ASCII motions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : article crème, démos en panneaux sombres. Tout ce qui bouge est fait de caractères ;
+   la typo de la marque (Kokoschka, Stolzl) encadre, le mono travaille. */
+@font-face{font-family:"Kokoschka";src:url(assets/fonts/Kokoschka-casa.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Stolzl";font-weight:700;src:url(assets/fonts/Stolzl-Bold-casa.woff2) format("woff2");font-display:swap}
+:root{
+  --paper:#FFFEF1; --ink:#0B0F1E; --a:#E8B04A; --b:#7BB1DD; --stage:#0B0F1E; --muted:#5b5f6e; --rule:#0B0F1E22;
+  --display:"Kokoschka","Outfit",system-ui,sans-serif;
+  --label:"Stolzl","Outfit",system-ui,sans-serif;
+  --body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
+}
+[data-id="2"]{--ink:#0D0D11; --a:#D9203D; --b:#F4A195; --stage:#0D0D11; --rule:#0D0D1122}
+[data-id="3"]{--ink:#280D19; --a:#E4A479; --b:#E9F188; --stage:#280D19; --rule:#280D1922; --paper:#FFFEEB}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.2vw,19px);line-height:1.62;transition:background .4s}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+.lab{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem}
+.mono{font-family:var(--mono)}
+.top{max-width:1120px;margin:0 auto;padding:22px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--rule)}
+.top .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.3rem;color:var(--ink);text-decoration:none}
+.top .brand svg{width:30px;height:26px;color:var(--a)}
+.hero{padding:64px 0 30px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);margin-bottom:24px}
+.hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(2.6rem,7vw,4.8rem);line-height:.9;margin:0 0 22px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--a)}
+.hero .dek{font-size:1.25em;font-weight:300;margin:0;max-width:36ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tags span{border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px}
+article h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(1.8rem,3.4vw,2.4rem);line-height:.95;margin:60px 0 16px;display:flex;gap:14px;align-items:baseline}
+article h2 small{font-family:var(--label);font-weight:700;font-size:.8rem;letter-spacing:.12em;color:var(--a)}
+article p{margin:0 0 1.05em}
+article ul{padding-left:1.1em;margin:0 0 1.2em}
+article li{margin-bottom:.35em}
+code{font-family:var(--mono);font-size:.88em;background:color-mix(in srgb,var(--a) 20%,transparent);padding:1px 6px;border-radius:5px}
+.pull{font-family:var(--display);text-transform:uppercase;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1;margin:40px 0;padding-left:20px;border-left:5px solid var(--a)}
+table{width:100%;border-collapse:collapse;margin:10px 0 24px;font-variant-numeric:tabular-nums;font-size:.94em}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+
+/* panneaux de démo */
+.panel{background:var(--stage);color:var(--paper);border-radius:24px;overflow:hidden;margin:28px auto;transition:background .4s;position:relative}
+.panel.wide{max-width:1120px}
+.panel canvas{display:block;width:100%;cursor:crosshair}
+.panel .cap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid color-mix(in srgb,var(--paper) 14%,transparent);font-size:.82rem}
+.panel .cap span:last-child{opacity:.6}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:1120px;margin:28px auto;padding:0 20px}
+.grid2 .panel{margin:0}
+.controls{max-width:1120px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.controls label{display:flex;gap:10px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:7px 12px;font-family:var(--mono);font-size:.8rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.dots{display:flex;gap:8px}
+.dots button{width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);padding:0;background:conic-gradient(var(--c1) 0 50%,var(--c2) 0)}
+.dots button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+input[type=range]{accent-color:var(--a);width:140px}
+.copy{border:0;background:var(--a);color:var(--stage);border-radius:999px;padding:10px 16px;font-family:var(--label);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.ramp{font-family:var(--mono);font-size:1.4rem;letter-spacing:.4em;background:var(--stage);color:var(--a);padding:16px 20px;border-radius:14px;overflow-x:auto;white-space:nowrap;transition:background .4s}
+.credits{margin:70px 0 40px;padding-top:22px;border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+.credits div span{display:block;color:var(--muted);margin-bottom:4px}
+footer{max-width:1120px;margin:0 auto;padding:24px 20px 50px;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,150%);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:999px;transition:transform .4s cubic-bezier(.2,1.4,.4,1);z-index:9}
+.toast.on{transform:translate(-50%,0)}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="house" viewBox="{{ICON_VB}}"><path d="{{ICON_D}}" fill-rule="evenodd" fill="currentColor"/></symbol></svg>
+<header class="top"><a class="brand" href="#top"><svg><use href="#house"/></svg>Casa Mar</a><span class="lab">Journal de design</span></header>
+
+<main id="top">
+<div class="wrap hero">
+  <div class="meta lab"><span>20 nov. 2026</span><span>Motion</span><span>Lecture 4 min</span></div>
+  <h1>Casa Mar : <em>ASCII</em> motions</h1>
+  <p class="dek">La maison, la mer, le soleil rayé et nos lettres, redessinés avec des caractères de machine à écrire, et animés en temps réel.</p>
+  <div class="tags lab"><span>Motion</span><span>ASCII</span><span>Génératif</span><span>Identité</span></div>
+</div>
+
+<section class="panel wide" aria-label="Démo principale : la maison sur la mer en ASCII">
+  <canvas id="c-hero" height="620" role="img" aria-label="Animation ASCII : la maison Casa Mar sur la mer, soleil rayé derrière, vagues en caractères"></canvas>
+  <div class="cap mono"><span>01 · La maison sur la mer · passe la souris sur l'eau</span><span id="fps-hero">—</span></div>
+</section>
+
+<div class="controls" role="group" aria-label="Réglages des démos">
+  <div class="seg" role="group" aria-label="Jeu de caractères" id="charsets"></div>
+  <label class="mono">taille <input type="range" id="cell" min="8" max="20" value="12" aria-label="Taille des caractères"></label>
+  <div class="dots" role="group" aria-label="Charte graphique">
+    <button data-set="1" aria-pressed="true" title="Orange et bleu" aria-label="Charte orange et bleu" style="--c1:#E8B04A;--c2:#7BB1DD"></button>
+    <button data-set="2" aria-pressed="false" title="Rouge et rose" aria-label="Charte rouge et rose" style="--c1:#D9203D;--c2:#F4A195"></button>
+    <button data-set="3" aria-pressed="false" title="Pêche et citron" aria-label="Charte pêche et citron" style="--c1:#E4A479;--c2:#E9F188"></button>
+  </div>
+  <button class="copy" id="copy">Copier l'image en texte</button>
+</div>
+
+<article class="wrap">
+  <p>Pour la première édition de Casa Mar, on voulait un langage de motion qui tienne dans un fil Instagram comme sur un écran géant au Clos de Provence. Quelque chose de chaleureux et d'un peu bricolé, comme une maison de vacances. L'ASCII coche toutes les cases : c'est léger, ça vit en temps réel et ça se lit de loin. Et ça a le charme des vieux terminaux et des tickets de caisse.</p>
+  <p>Le principe : on dessine nos formes normalement dans une petite image invisible, puis chaque case de la grille est remplacée par un caractère choisi selon la luminosité. La couleur vient de la charte, et chaque élément garde la sienne.</p>
+  <p class="pull">Une maison, la mer, la nuit. Rien que des caractères.</p>
+
+  <h2><small>02</small>La rampe</h2>
+  <p>Tout repose sur une rampe : une suite de caractères rangés du plus vide au plus plein. On en a construit trois, une par usage.</p>
+  <div class="ramp" id="ramp" aria-label="Rampe de caractères active"></div>
+  <ul>
+    <li><strong>Classique</strong> : la rampe historique des terminaux, la plus lisible.</li>
+    <li><strong>Maison</strong> : des points, des vagues <code>~ ≈</code> et la petite maison <code>⌂</code> pour les zones les plus denses.</li>
+    <li><strong>Blocs</strong> : les demi-tons <code>░ ▒ ▓ █</code>, plus graphiques, parfaits pour l'affichage grand format.</li>
+  </ul>
+</article>
+
+<div class="grid2">
+  <section class="panel" aria-label="Démo : la typo qui se brouille">
+    <canvas id="c-type" height="420" role="img" aria-label="Animation ASCII : les mots FAIS, COMME, CHEZ, TOI, LINE, UP, JUIN, 2028 l'un après l'autre, en lettres Kokoschka faites de caractères"></canvas>
+    <div class="cap mono"><span>02 · Kokoschka en caractères</span><span>clic : mot suivant</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : le soleil rayé">
+    <canvas id="c-sun" height="420" role="img" aria-label="Animation ASCII : le soleil rayé qui se couche dans la mer"></canvas>
+    <div class="cap mono"><span>03 · Le soleil rayé</span><span>motif du tote bag</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : la maison qui se dessine">
+    <canvas id="c-draw" height="420" role="img" aria-label="Animation ASCII : la maison se construit de bas en haut, caractère par caractère"></canvas>
+    <div class="cap mono"><span>04 · La maison se dessine</span><span>boucle de 4 s</span></div>
+  </section>
+  <section class="panel" aria-label="Démo : la houle">
+    <canvas id="c-waves" height="420" role="img" aria-label="Animation ASCII : une houle de caractères tilde"></canvas>
+    <div class="cap mono"><span>05 · La houle</span><span>bouge la souris</span></div>
+  </section>
+</div>
+
+<article class="wrap">
+  <h2><small>03</small>Comment ça bouge</h2>
+  <p>Chaque animation est un petit dessin refait 30 fois par seconde. La maison et le soleil viennent du logo vectoriel, la typo vient directement de Kokoschka : on trace les lettres dans l'image invisible, la grille fait le reste.</p>
+  <ul>
+    <li><strong>La couleur par élément.</strong> Le dessin invisible sépare les éléments par canal : la maison et la typo dans le rouge, le soleil dans le vert, la mer dans le bleu. Chaque caractère prend la couleur de la charte de l'élément qui domine sa case.</li>
+    <li><strong>La souris comme une pierre dans l'eau.</strong> Sous le curseur, la grille se déforme en ondes concentriques : les caractères glissent puis reviennent.</li>
+    <li><strong>Le brouillage.</strong> Pour changer de mot, chaque case passe par trois ou quatre caractères au hasard avant de se poser. La transition dure 600 ms, de gauche à droite.</li>
+    <li><strong>Les étoiles.</strong> Quelques points isolés scintillent dans les trois couleurs de la charte, comme dans nos teasers.</li>
+  </ul>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Paramètre</th><th>Valeur</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td>Cadence</td><td><code>30 i/s</code></td><td>Assez fluide, et ça garde un côté machine.</td></tr>
+      <tr><td>Cellule</td><td><code>12 px</code> (réglable 8 à 20)</td><td>Lisible sur mobile, dense sur grand écran.</td></tr>
+      <tr><td>Rampe classique</td><td><code> .:-=+*#%@</code></td><td>10 niveaux de densité.</td></tr>
+      <tr><td>Onde de la souris</td><td>rayon <code>14 cases</code>, amorti <code>0,92</code></td><td>Une ride, pas une tempête.</td></tr>
+      <tr><td>Brouillage</td><td><code>600 ms</code>, décalage <code>8 ms</code> par colonne</td><td>Le mot se pose de gauche à droite.</td></tr>
+      <tr><td>Dessin de la maison</td><td><code>4 s</code>, de bas en haut</td><td>Comme une construction.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2><small>04</small>Trois chartes</h2>
+  <p>Comme pour nos teasers, l'ASCII existe dans les trois identités de Casa Mar. Le fond, l'accent et la couleur secondaire changent, les rampes restent les mêmes. Teste-les avec les pastilles au-dessus des démos.</p>
+
+  <h2><small>05</small>Où on l'utilise</h2>
+  <ul>
+    <li><strong>Les stories et reels</strong> : capturés en vidéo, ces motions servent de fonds et de transitions entre deux annonces du line-up.</li>
+    <li><strong>Les écrans sur place</strong> : la houle et la maison tournent en boucle, avec la taille de caractère au maximum.</li>
+    <li><strong>Les messages</strong> : le bouton « Copier l'image en texte » copie l'image du moment en vrais caractères, à coller dans un message, un tweet ou un mail.</li>
+  </ul>
+
+  <div class="credits">
+    <div><span class="lab">Projet</span>Casa Mar, première édition</div>
+    <div><span class="lab">Identité</span>Kokoschka, Stolzl, trois palettes</div>
+    <div><span class="lab">Techno</span>Canvas 2D, JavaScript, IBM Plex Mono</div>
+    <div><span class="lab">Infos</span>Juin 2028 · Clos de Provence, Nîmes · 18+</div>
+  </div>
+</article>
+</main>
+<footer><span>Casa Mar · Fais comme chez toi</span><span>Billets : Early 22€ avant 14h · Plein tarif 30€ · VIP 60€</span></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(async () => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const root = document.documentElement;
+const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+const HOUSE = new Path2D("{{ICON_D}}");
+const HVB = "{{ICON_VB}}".split(' ').map(Number);             // 0 0 w h
+try { const f = new FontFace('Kokoschka', 'url(assets/fonts/Kokoschka-casa.woff2)'); await f.load(); document.fonts.add(f); } catch {}
+try { await document.fonts.load('600 12px "IBM Plex Mono"'); } catch {}
+
+const SETS = {
+  Classique: ' .:-=+*#%@',
+  Maison: ' .·:~≈=⌂',
+  Blocs: ' ░▒▓█',
+};
+let setName = 'Classique', RAMP = SETS[setName], CELL = 12;
+let PAL = {};
+function readPal() { PAL = { bg: css('--stage'), a: css('--a'), b: css('--b'), c: css('--paper') }; }
+readPal();
+
+/* ---------- moteur ASCII ---------- */
+function makeASCII(canvas, draw, opts = {}) {
+  const ctx = canvas.getContext('2d');
+  const off = document.createElement('canvas'), octx = off.getContext('2d', { willReadFrequently: true });
+  const st = { mx: -1e3, my: -1e3, ripples: [], cols: 0, rows: 0, text: '', canvas, opts, t0: performance.now() };
+  function size() {
+    const w = canvas.clientWidth, h = +canvas.getAttribute('height');
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    st.cw = CELL * .62; st.ch = CELL * 1.05;
+    st.cols = Math.floor(w / st.cw); st.rows = Math.floor(h / st.ch);
+    off.width = st.cols; off.height = st.rows; st.w = w; st.h = h;
+  }
+  size(); new ResizeObserver(size).observe(canvas); st.size = size;
+  canvas.addEventListener('pointermove', e => { const r = canvas.getBoundingClientRect(); const x = (e.clientX - r.left) / st.cw, y = (e.clientY - r.top) / st.ch;
+    if (Math.hypot(x - st.mx, y - st.my) > 2.5) st.ripples.push({ x, y, t: st.now || 0 }); st.mx = x; st.my = y; if (st.ripples.length > 14) st.ripples.shift(); });
+  canvas.addEventListener('pointerleave', () => { st.mx = st.my = -1e3; });
+  st.render = (t) => {
+    st.now = t;
+    const { cols, rows } = st;
+    octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = 'source-over';
+    octx.fillStyle = '#000'; octx.fillRect(0, 0, cols, rows);
+    octx.globalCompositeOperation = 'lighter';
+    draw(octx, cols, rows, t, st);
+    const img = octx.getImageData(0, 0, cols, rows).data;
+    ctx.fillStyle = PAL.bg; ctx.fillRect(0, 0, st.w, st.h);
+    ctx.font = `600 ${CELL}px "IBM Plex Mono", ui-monospace, monospace`; ctx.textBaseline = 'top';
+    const groups = { a: [], b: [], c: [], s: [] };
+    let txt = '';
+    const n = RAMP.length - 1;
+    for (let y = 0; y < rows; y++) {
+      let line = '';
+      for (let x = 0; x < cols; x++) {
+        // déformation : ondes de la souris
+        let sx = x, sy = y;
+        for (const r of st.ripples) {
+          const age = (t - r.t) / 1000; if (age > 1.6) continue;
+          const d = Math.hypot(x - r.x, (y - r.y) * 1.7), rad = age * 26;
+          const k = Math.exp(-((d - rad) ** 2) / 6) * (1 - age / 1.6) * 1.6;
+          if (k > .02) { sx += (x - r.x) / (d + .1) * k; sy += (y - r.y) / (d + .1) * k * .6; }
+        }
+        sx = Math.max(0, Math.min(cols - 1, Math.round(sx))); sy = Math.max(0, Math.min(rows - 1, Math.round(sy)));
+        const i = (sy * cols + sx) * 4, R = img[i], G = img[i + 1], B = img[i + 2];
+        const v = Math.max(R, G, B);
+        if (v < 14) { line += ' '; continue; }
+        const ch = RAMP[Math.min(n, Math.max(1, Math.round(v / 255 * n)))];
+        line += ch;
+        const g = v === R ? (opts.redIs || 'a') : v === G ? (opts.greenIs || 'a') : (opts.blueIs || 'b');
+        groups[g].push(x, y, ch);
+      }
+      txt += line.replace(/\s+$/, '') + '\n';
+    }
+    // étoiles
+    if (opts.stars) {
+      let s = 3; const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
+      for (let k = 0; k < opts.stars; k++) {
+        const x = Math.floor(rnd() * cols), y = Math.floor(rnd() * rows * opts.starTop), ph = rnd() * 6.3;
+        if (Math.sin(t / 1000 * (1 + rnd() * 2) + ph) > .3) groups.s.push(x, y, ['.', '+', '*'][k % 3], k % 3);
+      }
+    }
+    for (const key of ['a', 'b', 'c']) {
+      ctx.fillStyle = PAL[key]; const g = groups[key];
+      for (let k = 0; k < g.length; k += 3) ctx.fillText(g[k + 2], g[k] * st.cw, g[k + 1] * st.ch);
+    }
+    const sc = [PAL.a, PAL.b, PAL.c]; const g = groups.s;
+    for (let k = 0; k < g.length; k += 4) { ctx.fillStyle = sc[g[k + 3]]; ctx.fillText(g[k + 2], g[k] * st.cw, g[k + 1] * st.ch); }
+    st.text = txt;
+  };
+  return st;
+}
+
+/* helpers de dessin dans l'image invisible */
+const AR = 1.05 / .62;                                        // une case est 1,7 fois plus haute que large
+function house(o, cx, baseY, w, color, clipFrom = 1) {
+  const s = w / HVB[2], h = HVB[3] * s / AR;
+  o.save(); o.translate(cx - w / 2, baseY - h); o.scale(s, s / AR);
+  if (clipFrom < 1) { o.beginPath(); o.rect(0, HVB[3] * (1 - clipFrom), HVB[2], HVB[3]); o.clip(); }
+  o.fillStyle = color; o.fill(HOUSE, 'evenodd'); o.restore();
+  return h;
+}
+function sun(o, cx, cy, r, t, color = '#00ff00', bands = true) {
+  const rx = r * AR;
+  o.save(); o.beginPath(); o.ellipse(cx, cy, rx, r, 0, 0, 7); o.clip();
+  o.fillStyle = color; o.fillRect(cx - rx, cy - r, rx * 2, r * 2);
+  if (bands) { o.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 7; i++) { const y = cy + r * .1 + i * r * .17 + (t * r * .05) % (r * .17); o.fillRect(cx - rx, y, rx * 2, Math.max(1, r * .05 + i * r * .012)); } }
+  o.restore(); o.globalCompositeOperation = 'lighter';
+}
+function sea(o, cols, rows, top, t, amp = 1, inten = 1) {
+  for (let y = Math.floor(top); y < rows; y++) {
+    const k = (y - top) / (rows - top);
+    for (let x = 0; x < cols; x++) {
+      const w = Math.sin(x * (.16 - k * .08) + t * 1.4 + y * .9) * .5 + Math.sin(x * .05 - t * .8 + y * .35) * .5;
+      const v = Math.max(0, w) ** 2 * (60 + 180 * k) * amp * inten;
+      if (v > 8) { o.fillStyle = `rgb(0,0,${Math.min(255, v | 0)})`; o.fillRect(x, y, 1, 1); }
+    }
+  }
+}
+
+/* ---------- 01 la maison sur la mer ---------- */
+const hero = makeASCII($('#c-hero'), (o, cols, rows, ms) => {
+  const t = ms / 1000, hz = rows * .64;
+  sun(o, cols * .5, hz - rows * .02 + Math.sin(t * .2) * 1.5, rows * .26, t);
+  o.globalCompositeOperation = 'source-over'; o.fillStyle = '#000'; o.fillRect(0, hz, cols, rows); o.globalCompositeOperation = 'lighter';
+  house(o, cols * .5, hz + 1 + Math.sin(t * 1.2) * .5, Math.min(cols * .34, rows * 1.15), '#ff0000');
+  sea(o, cols, rows, hz + 1, t);
+  // reflet de la maison
+  o.save(); o.globalAlpha = .35; o.translate(0, (hz + 1) * 2); o.scale(1, -1);
+  house(o, cols * .5 + Math.sin(t * 3) * .6, hz + 1, Math.min(cols * .34, rows * 1.15), '#ff0000'); o.restore();
+}, { stars: 70, starTop: .4, redIs: 'c', greenIs: 'a', blueIs: 'b' });
+
+/* ---------- 02 typo ---------- */
+const WORDS = ['FAIS', 'COMME', 'CHEZ', 'TOI', 'LINE', 'UP', 'JUIN', '2028'];
+let wi = 0, wSince = 0;
+const type = makeASCII($('#c-type'), (o, cols, rows, ms, st) => {
+  if (!wSince) wSince = ms;
+  if (ms - wSince > 1500) { wi = (wi + 1) % WORDS.length; wSince = ms; }
+  const word = WORDS[wi];
+  o.fillStyle = '#ff0000'; o.textAlign = 'center'; o.textBaseline = 'middle';
+  let fs = rows * .62; o.font = `${fs}px Kokoschka`;
+  const w = o.measureText(word).width * AR; if (w > cols * .9) { fs *= cols * .9 / w; o.font = `${fs}px Kokoschka`; }
+  o.textBaseline = 'alphabetic'; const m = o.measureText(word), gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  o.save(); o.translate(cols / 2, rows * .46 - gh / 2 + m.actualBoundingBoxAscent); o.scale(AR, 1); o.fillText(word, 0, 0); o.restore();
+  // ligne de vagues sous le mot
+  o.fillStyle = '#0000ff';
+  for (let x = cols * .3; x < cols * .7; x++) o.fillRect(x, rows * .46 + gh / 2 + 3 + Math.sin(x * .5 + ms / 300) * 1.2, 1, 1.2);
+  st.scramble = Math.max(0, 1 - (ms - wSince) / 600);
+}, { redIs: 'a', blueIs: 'b' });
+$('#c-type').addEventListener('click', () => { wi = (wi + 1) % WORDS.length; wSince = performance.now(); });
+// brouillage : surcouche sur le rendu de base
+const baseTypeRender = type.render;
+type.render = t => {
+  const keep = RAMP; const k = type.scramble || 0;
+  if (k > 0 && !reduce) { RAMP = [...RAMP].sort(() => Math.random() - .5).join(''); RAMP = keep[0] + RAMP.replace(keep[0], ''); }
+  baseTypeRender(t); RAMP = keep;
+};
+
+/* ---------- 03 soleil ---------- */
+const sunD = makeASCII($('#c-sun'), (o, cols, rows, ms) => {
+  const t = ms / 1000, hz = rows * .66, ph = (t % 9) / 9;
+  sun(o, cols * .5, hz - rows * .22 + ph * rows * .45, rows * .3, t * 2);
+  o.globalCompositeOperation = 'source-over'; o.fillStyle = '#000'; o.fillRect(0, hz, cols, rows); o.globalCompositeOperation = 'lighter';
+  sea(o, cols, rows, hz, t, .9);
+  // reflet doré
+  for (let y = Math.ceil(hz); y < rows; y++) { const w = (1 - ph) * cols * .25 * (1 - (y - hz) / rows); if (Math.sin(y * 1.3 + t * 4) > 0) { o.fillStyle = '#00b400'; o.fillRect(cols * .5 - w / 2, y, w, 1); } }
+}, { stars: 40, starTop: .5, greenIs: 'a', blueIs: 'b' });
+
+/* ---------- 04 la maison se dessine ---------- */
+const draw = makeASCII($('#c-draw'), (o, cols, rows, ms) => {
+  const t = (ms / 1000) % 4, k = Math.min(1, t / 2.6);
+  const ease = k * k * (3 - 2 * k);
+  house(o, cols * .5, rows * .82, Math.min(cols * .5, rows * 1.6), '#ff0000', ease);
+  // la « tête » qui construit : une ligne lumineuse
+  if (k < 1) { const ww = Math.min(cols * .5, rows * 1.6); const hh = HVB[3] * ww / HVB[2] / AR; const y = rows * .82 - hh * ease;
+    o.fillStyle = '#0000ff'; o.fillRect(cols * .5 - ww * .55, y, ww * 1.1, 1); }
+  for (let x = 0; x < cols; x++) { o.fillStyle = '#0000a0'; o.fillRect(x, rows * .82 + 1 + Math.round(Math.sin(x * .35 + ms / 400) * .6), 1, 1); }
+  if (t > 3.5) { o.globalCompositeOperation = 'source-over'; o.fillStyle = `rgba(0,0,0,${(t - 3.5) * 2})`; o.fillRect(0, 0, cols, rows); }
+}, { redIs: 'a', blueIs: 'b' });
+
+/* ---------- 05 la houle ---------- */
+const waves = makeASCII($('#c-waves'), (o, cols, rows, ms, st) => {
+  const t = ms / 1000;
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    let v = Math.sin(x * .22 + y * .55 + t * 1.6) + Math.sin(x * .07 - y * .2 - t * .9) * .8 + Math.sin((x + y) * .13 + t * .5) * .4;
+    const d = Math.hypot(x - st.mx, (y - st.my) * 1.8); v += Math.sin(d * .7 - t * 6) * Math.exp(-d / 9) * 1.6;
+    const val = Math.max(0, (v + 1.2) / 3.4) ** 1.6 * 255;
+    o.fillStyle = y < rows * .08 + Math.sin(x * .2 + t) * 1.5 ? `rgb(${val | 0},0,0)` : `rgb(0,0,${val | 0})`;
+    o.fillRect(x, y, 1, 1);
+  }
+}, { redIs: 'a', blueIs: 'b' });
+
+const all = [hero, type, sunD, draw, waves];
+
+/* ---------- boucle : 30 i/s, seulement les démos visibles ---------- */
+const vis = new Set();
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)));
+all.forEach(s => io.observe(s.canvas));
+let last = 0, fpsN = 0, fpsT = 0;
+function loop(now) {
+  if (now - last >= 33) {
+    last = now;
+    all.forEach(s => { if (vis.has(s.canvas)) s.render(now); });
+    fpsN++; if (now - fpsT > 1000) { $('#fps-hero').textContent = `${hero.cols}×${hero.rows} car. · ${fpsN} i/s`; fpsN = 0; fpsT = now; }
+  }
+  requestAnimationFrame(loop);
+}
+all.forEach(s => s.render(1800));                         // premier rendu immédiat
+if (!reduce) requestAnimationFrame(loop); else $('#fps-hero').textContent = 'animations réduites';
+
+/* ---------- réglages ---------- */
+const segs = $('#charsets');
+segs.innerHTML = Object.keys(SETS).map(k => `<button aria-pressed="${k === setName}" data-k="${k}">${k}</button>`).join('');
+function rampView() { $('#ramp').textContent = RAMP.replace(' ', '␣'); }
+rampView();
+segs.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setName = b.dataset.k; RAMP = SETS[setName];
+  $$('#charsets button').forEach(x => x.setAttribute('aria-pressed', x === b)); rampView(); if (reduce) all.forEach(s => s.render(1800)); });
+$('#cell').addEventListener('input', e => { CELL = +e.target.value; all.forEach(s => { s.size(); s.render(performance.now()); }); });
+$$('[data-set]').forEach(b => b.addEventListener('click', () => { root.dataset.id = b.dataset.set;
+  $$('.dots button').forEach(x => x.setAttribute('aria-pressed', x.dataset.set === b.dataset.set)); readPal(); all.forEach(s => s.render(performance.now())); }));
+let tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600); }
+$('#copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(hero.text); toast('Image copiée en texte : colle-la où tu veux'); }
+  catch { toast('La copie est bloquée par ce navigateur'); }
+});
+})();
+</script>
+</body>
+</html>
